@@ -1,0 +1,108 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{8AAE5734-DA32-4B8F-943F-3C7B5DCB7C70}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="ExecutionMaster.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="emc.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="AskDialog\Ask.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="DenyDialog\Deny.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="DropDialog\Drop.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="ElevateDialog\Elevate.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="PowerRequestDialog\PowerRequest.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="ExecutionMaster">
+        <MSBuild Projects="ExecutionMaster.dproj"/>
+    </Target>
+    <Target Name="ExecutionMaster:Clean">
+        <MSBuild Projects="ExecutionMaster.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ExecutionMaster:Make">
+        <MSBuild Projects="ExecutionMaster.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="emc">
+        <MSBuild Projects="emc.dproj"/>
+    </Target>
+    <Target Name="emc:Clean">
+        <MSBuild Projects="emc.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="emc:Make">
+        <MSBuild Projects="emc.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Ask">
+        <MSBuild Projects="AskDialog\Ask.dproj"/>
+    </Target>
+    <Target Name="Ask:Clean">
+        <MSBuild Projects="AskDialog\Ask.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Ask:Make">
+        <MSBuild Projects="AskDialog\Ask.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Deny">
+        <MSBuild Projects="DenyDialog\Deny.dproj"/>
+    </Target>
+    <Target Name="Deny:Clean">
+        <MSBuild Projects="DenyDialog\Deny.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Deny:Make">
+        <MSBuild Projects="DenyDialog\Deny.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Drop">
+        <MSBuild Projects="DropDialog\Drop.dproj"/>
+    </Target>
+    <Target Name="Drop:Clean">
+        <MSBuild Projects="DropDialog\Drop.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Drop:Make">
+        <MSBuild Projects="DropDialog\Drop.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Elevate">
+        <MSBuild Projects="ElevateDialog\Elevate.dproj"/>
+    </Target>
+    <Target Name="Elevate:Clean">
+        <MSBuild Projects="ElevateDialog\Elevate.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Elevate:Make">
+        <MSBuild Projects="ElevateDialog\Elevate.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="PowerRequest">
+        <MSBuild Projects="PowerRequestDialog\PowerRequest.dproj"/>
+    </Target>
+    <Target Name="PowerRequest:Clean">
+        <MSBuild Projects="PowerRequestDialog\PowerRequest.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="PowerRequest:Make">
+        <MSBuild Projects="PowerRequestDialog\PowerRequest.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="ExecutionMaster;emc;Ask;Deny;Drop;Elevate;PowerRequest"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="ExecutionMaster:Clean;emc:Clean;Ask:Clean;Deny:Clean;Drop:Clean;Elevate:Clean;PowerRequest:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="ExecutionMaster:Make;emc:Make;Ask:Make;Deny:Make;Drop:Make;Elevate:Make;PowerRequest:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
