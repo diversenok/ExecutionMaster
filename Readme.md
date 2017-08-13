@@ -1,5 +1,5 @@
-﻿**Execution Master** is a program that allows you to configure any program
-launch using several standard actions:
+﻿**Execution Master** is a program for Windows that allows you to configure any
+program launch using several standard actions:
 
  - **Ask** user to confirm program execution;
  - **Deny** program execution (2 modes: notify user and not);
