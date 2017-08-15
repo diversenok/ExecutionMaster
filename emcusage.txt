@@ -1,3 +1,17 @@
+'This program comes with ABSOLUTELY NO WARRANTY.'#$D#$A +
+'This is free software, and you are welcome to redistribute it'#$D#$A +
+'under certain conditions; see LICENSE.txt for details.'#$D#$A +
+''#$D#$A +
+'ExecutionMaster is a program for Windows that allows you to configure'#$D#$A +
+'any program launch using several standard actions:'#$D#$A +
+''#$D#$A +
+' - Ask user to confirm program execution;'#$D#$A +
+' - Deny program execution (2 modes: notify user and not);'#$D#$A +
+' - Drop administrative privileges of specified program;'#$D#$A +
+' - Request elevation for the program at every launch;'#$D#$A +
+' - Force system not to sleep / display to be on while selected prorgam works;'#$D#$A +
+' - Execute another program instead of specified.'#$D#$A +
+''#$D#$A +
 'Usage: emc.exe [query|set|reset] [[parameters]]'#$D#$A +
 ''#$D#$A +
 ' query: Lists all programs with specified actions according to the mask.'#$D#$A +

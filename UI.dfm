@@ -24,8 +24,6 @@ object ExecListDialog: TExecListDialog
     Align = alRight
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitLeft = 405
-    ExplicitHeight = 300
     object LabelImagePath: TLabel
       Left = 8
       Top = 8
@@ -77,7 +75,7 @@ object ExecListDialog: TExecListDialog
       TabOrder = 1
       OnClick = ButtonBrowseClick
     end
-    object EditImagePath: TEdit
+    object EditImage: TEdit
       Left = 8
       Top = 27
       Width = 161
@@ -93,8 +91,6 @@ object ExecListDialog: TExecListDialog
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitWidth = 405
-    ExplicitHeight = 300
     object ListViewExec: TListView
       Left = 0
       Top = 0
@@ -117,8 +113,6 @@ object ExecListDialog: TExecListDialog
       TabOrder = 0
       ViewStyle = vsReport
       OnChange = ListViewExecChange
-      ExplicitWidth = 405
-      ExplicitHeight = 267
     end
     object PanelBottom: TPanel
       Left = 0
@@ -128,8 +122,6 @@ object ExecListDialog: TExecListDialog
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitTop = 267
-      ExplicitWidth = 405
       object ButtonRefresh: TBitBtn
         Left = 8
         Top = 4
@@ -200,8 +192,6 @@ object ExecListDialog: TExecListDialog
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 2
-        ExplicitLeft = 325
-        ExplicitTop = 6
         object ButtonAdd: TButton
           Left = 2
           Top = 4

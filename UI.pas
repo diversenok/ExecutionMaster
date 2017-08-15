@@ -1,19 +1,34 @@
-{ 2017 © diversenok@gmail.com }
+{   ExecutionMaster component.
+    Copyright (C) 2017 diversenok 
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>    }
 
 unit UI;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, StdCtrls, ExtCtrls, Buttons, IFEO;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes,
+  VCL.Graphics, VCL.Controls, VCL.Forms, VCL.Dialogs, VCL.ComCtrls,
+  VCL.StdCtrls, VCL.ExtCtrls, VCL.Buttons, IFEO;
 
 type
   TExecListDialog = class(TForm)
     PanelRight: TPanel;
     GroupBoxAction: TGroupBox;
     ListViewExec: TListView;
-    EditImagePath: TEdit;
+    EditImage: TEdit;
     LabelImagePath: TLabel;
     ButtonBrowse: TButton;
     EditExec: TEdit;
@@ -49,9 +64,11 @@ implementation
 uses ProcessUtils;
 
 const
-  WARN_SYSTPROC = '%s is a system process. Performing this action may ' +
-    'cause system instability. Are you sure?';
-  WARN_SYSTPROC_CAPTION = 'System process';
+  WARN_SYSPROC_CAPTION = 'System process';
+  WARN_COMPAT_CAPTION = 'Compatibility problems';
+
+  ERR_ONLYNAME = '"Executable name" should contain only file name, not a path.';
+  ERR_ONLYNAME_CAPTION = 'Executable name';
 
   ActionHints: array [TAction] of string =
     ('Ask user permission to launch executable',
@@ -74,7 +91,7 @@ end;
 procedure TExecListDialog.ButtonBrowseClick(Sender: TObject);
 begin
   if OpenDlg.Execute then
-    EditImagePath.Text := ExtractFileName(OpenDlg.FileName);
+    EditImage.Text := ExtractFileName(OpenDlg.FileName);
 end;
 
 procedure TExecListDialog.ButtonBrowseExecClick(Sender: TObject);
@@ -129,7 +146,7 @@ begin
     if ListViewExec.SelCount <> 0 then
       with Core.Debuggers[ListViewExec.Selected.Index] do
       begin
-        EditImagePath.Text := TreatedFile;
+        EditImage.Text := TreatedFile;
         ActionButtons[Action].Checked := True;
         if Action = aExecuteEx then
           EditExec.Text := ExecStr;
@@ -141,12 +158,27 @@ procedure TExecListDialog.ButtonAddClick(Sender: TObject);
 var
   i: integer;
 begin
+  if (Length(EditImage.Text) = 0) or (Pos('\', EditImage.Text) <> 0) or
+     (Pos('/', EditImage.Text) <> 0) or (Pos('"', EditImage.Text) <> 0) then
+  begin
+    MessageBox(Handle, PChar(ERR_ONLYNAME), PChar(ERR_ONLYNAME_CAPTION),
+     MB_OK or MB_ICONERROR);
+    Exit;
+  end;
+
   for i := Low(DangerousProcesses) to High(DangerousProcesses) do
-    if LowerCase(EditImagePath.Text) = DangerousProcesses[i] then
-      if MessageBox(Handle, PChar(Format(WARN_SYSTPROC, [EditImagePath.Text])),
-        PChar(WARN_SYSTPROC_CAPTION), MB_YESNO or MB_ICONWARNING) <> IDYES then
+    if LowerCase(EditImage.Text) = DangerousProcesses[i] then
+      if MessageBox(Handle, PChar(Format(WARN_SYSPROC, [EditImage.Text])),
+        PChar(WARN_SYSPROC_CAPTION), MB_YESNO or MB_ICONWARNING) <> IDYES then
         Exit;
-  Core.AddDebugger(TIFEORec.Create(GetTAction, EditImagePath.Text,
+
+  for i := Low(CompatibilityProblems) to High(CompatibilityProblems) do
+    if LowerCase(EditImage.Text) = CompatibilityProblems[i] then
+      if MessageBox(Handle, PChar(Format(WARN_COMPAT, [EditImage.Text])),
+        PChar(WARN_COMPAT_CAPTION), MB_YESNO or MB_ICONWARNING) <> IDYES then
+        Exit;
+
+  Core.AddDebugger(TIFEORec.Create(GetTAction, EditImage.Text,
     EditExec.Text));
   Refresh(ButtonAdd);
   ListViewExecChange(Sender, ListViewExec.Selected, ctState);

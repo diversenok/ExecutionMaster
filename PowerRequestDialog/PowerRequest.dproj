@@ -50,22 +50,17 @@
         <CfgParent>Base</CfgParent>
         <Base>true</Base>
     </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win64)'!=''">
-        <Cfg_2_Win64>true</Cfg_2_Win64>
-        <CfgParent>Cfg_2</CfgParent>
-        <Cfg_2>true</Cfg_2>
-        <Base>true</Base>
-    </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
+        <Icon_MainIcon>PowerRequest.ico</Icon_MainIcon>
         <SanitizedProjectName>PowerRequest</SanitizedProjectName>
-        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Requests computer not to sleep / display to be on;FileVersion=0.8.13.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=;OriginalFilename=PowerRequest.exe;ProductName=Execution Master components: NoSleep &amp; Display-On;ProductVersion=0.8;Comments=Use /display parameter to force the display be on</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Requests computer not to sleep / display to be on;FileVersion=0.8.15.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=;OriginalFilename=PowerRequest.exe;ProductName=Execution Master components: NoSleep &amp; Display-On;ProductVersion=0.8;Comments=Use /display parameter to force the display be on</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
-        <VerInfo_Release>13</VerInfo_Release>
+        <VerInfo_Release>15</VerInfo_Release>
         <DCC_DcuOutput>..\__dcu\$(Platform)-$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>..\$(Platform)-$(Config)\Actions</DCC_ExeOutput>
         <DCC_E>false</DCC_E>
@@ -117,9 +112,6 @@
         <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
         <DCC_DebugInformation>0</DCC_DebugInformation>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
-        <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
@@ -551,13 +543,13 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
             <Platforms>
                 <Platform value="Android">False</Platform>

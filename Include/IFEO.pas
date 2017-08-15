@@ -1,4 +1,18 @@
-{ 2017 © diversenok@gmail.com }
+{   ExecutionMaster component.
+    Copyright (C) 2017 diversenok
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>    }
 
 unit IFEO;
 
@@ -16,11 +30,24 @@ const
     'Force display on', 'Execute: ');
 
   /// <summary> You shouldn't mess with them. </summary>
-  DangerousProcesses: array [1 .. 19] of string = ('csrss.exe', 'dwm.exe',
+  DangerousProcesses: array [0 .. 18] of string = ('csrss.exe', 'dwm.exe',
     'lsm.exe', 'logonui.exe', 'lsass.exe', 'services.exe', 'userinit.exe',
     'winlogon.exe', 'wininit.exe', 'smss.exe', 'svchost.exe', 'wlanext.exe',
     'conhost.exe', 'audiodg.exe', 'wlanext.exe', 'explorer.exe', 'dwm.exe',
     'consent.exe', 'dllhost.exe');
+
+  /// <summary> Warning for <c>DangerousProcesses</c>. </summary>
+  WARN_SYSPROC = '%s is a system process. Performing this action may ' +
+    'cause system instability. Are you sure?';
+
+  /// <summary> Some compatibility problems with specified processes. </summary>
+  CompatibilityProblems: array [0 .. 2] of String = ('chrome.exe',
+    'firefox.exe', 'browser.exe');
+
+  /// <summary> Warning for <c>CompatibilityProblems</c>. </summary>
+  WARN_COMPAT = 'There are several compatibility problems with setting ' +
+  'actions on %s' + #$D#$A + 'This program may start to work incorrectly. ' +
+  'Are you sure?';
 
 type
   /// <summary>
@@ -93,7 +120,8 @@ var
 
 implementation
 
-uses Windows, Registry, Classes, SysUtils, ShellApi, ProcessUtils;
+uses Winapi.Windows, System.Win.Registry, System.Classes, System.SysUtils,
+  Winapi.ShellApi, ProcessUtils;
 
 resourcestring
   ActionRel0 = '"%sActions\Ask.exe"';
