@@ -8,6 +8,8 @@ program launch using several standard actions:
  - Force system **not to sleep** / **display to be on** while selected prorgam works;
  - **Execute** another program instead of specified.
 
+![](https://habrastorage.org/web/2f2/7d8/3af/2f27d83af36747068f3e9a5e9d857b39.png)
+
 ### Release content:
 
 See [releases](https://github.com/diversenok/ExecutionMaster/releases) page
