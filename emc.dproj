@@ -45,11 +45,12 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
+        <VerInfo_Build>2</VerInfo_Build>
         <Icon_MainIcon>EM.ico</Icon_MainIcon>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <DCC_ConsoleTarget>true</DCC_ConsoleTarget>
-        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Configure any program execution [console version];FileVersion=0.8.15.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=;OriginalFilename=ExecMasterConsole.exe;ProductName=Execution Master: console version;ProductVersion=0.8;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Configure any program execution [console version];FileVersion=0.8.15.2;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=;OriginalFilename=ExecMasterConsole.exe;ProductName=Execution Master: console version;ProductVersion=0.8;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_Release>15</VerInfo_Release>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -111,6 +112,7 @@
         </DelphiCompile>
         <DCCReference Include="Include\IFEO.pas"/>
         <DCCReference Include="Include\ProcessUtils.pas"/>
+        <DCCReference Include="Include\CmdUtils.pas"/>
         <None Include="emcusage.txt"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
@@ -213,13 +215,13 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="iPad_Launch2048">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
@@ -252,13 +254,13 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectiOSResource">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
@@ -275,13 +277,13 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="iPhone_Launch640">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
@@ -298,13 +300,13 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="iPhone_Launch320">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
@@ -384,24 +386,24 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectiOSInfoPList">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="iPad_Launch1024">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
@@ -426,13 +428,13 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="iPad_Launch768">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
@@ -492,13 +494,13 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="iPhone_Launch640x1136">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
@@ -515,13 +517,13 @@
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="iPad_Launch1536">
-                    <Platform Name="iOSDevice32">
-                        <Operation>1</Operation>
-                    </Platform>
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
@@ -542,13 +544,13 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
             <Platforms>
                 <Platform value="Android">False</Platform>

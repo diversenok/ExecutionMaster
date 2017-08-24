@@ -27,7 +27,7 @@
 ''#$D#$A +
 ' set: Registers specified action for specified file.'#$D#$A +
 ' ==='#$D#$A +
-'  Usage: emc.exe set [file] [action] [: [another_file and it''s parameters]]'#$D#$A +
+'  Usage: emc.exe set [file] [action] [[another_file and it''s parameters]]'#$D#$A +
 '  Note:'#$D#$A +
 '   This will overwrite existing setting for specified file.'#$D#$A +
 '  Parameters:'#$D#$A +
@@ -45,7 +45,7 @@
 '    Now noone can run mshta.exe'#$D#$A +
 '   > emc set BSA.exe drop'#$D#$A +
 '    Now BSA.exe will run only with restricted privileges even after UAC.'#$D#$A +
-'   > emc set notepad.exe execute : "C:\Program Files\AkelPad\AkelPad.exe" /z'#$D#$A +
+'   > emc set notepad.exe execute "C:\Program Files\AkelPad\AkelPad.exe" /z'#$D#$A +
 '    Now text files will be opened in AkelPad with /z key instead of Notepad.'#$D#$A +
 ''#$D#$A +
 ' reset: Unregisters action for specified programs that matches mask.'#$D#$A +

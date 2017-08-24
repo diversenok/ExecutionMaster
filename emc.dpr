@@ -17,6 +17,7 @@
 program emc;
 
 {$APPTYPE CONSOLE}
+{$WEAKLINKRTTI ON}
 
 {$R *.res}
 
@@ -25,7 +26,8 @@ uses
   Winapi.Windows,
   System.Masks,
   IFEO in 'Include\IFEO.pas',
-  ProcessUtils in 'Include\ProcessUtils.pas';
+  ProcessUtils in 'Include\ProcessUtils.pas',
+  CmdUtils in 'Include\CmdUtils.pas';
 
 resourcestring
   USAGE = {$INCLUDE emcusage.txt};
@@ -84,18 +86,10 @@ const
 { We don't need to parse this part of command line — user is free at using
   quotes and spaces now. }
 function GetExec: string;
-const
-  DELIM = ' : ';
-var
-  ind: integer;
 begin
-  Result := GetCommandLine;
-  ind := Pos(DELIM, Result);
-  if ind = -1 then
-    raise Exception.Create('Need command line for execute action. See help.')
-  else
-    Result := Copy(Result, ind + Length(DELIM), Length(Result) - ind -
-      Length(DELIM) + 1);
+  if ParamCount < 4 then
+    raise Exception.Create('Need command line for "execute" action. See help.');
+  Result := ParamsStartingFrom(4);
 end;
 
 procedure CheckForProblems(S: String);

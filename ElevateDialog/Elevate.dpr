@@ -30,9 +30,9 @@ begin
       ExitProcess(ERROR_INVALID_PARAMETER);
 
     if IsElevated then
-      RunUnderDebuggerW(ParamsStartingFrom(1))
+      RunIgnoringIFEO(ParamsStartingFrom(1))
     else
-      RunElevatedW(ParamsStartingFrom(1));
+      RunElevated(ParamsStartingFrom(1));
   except
     ExitProcess(STATUS_DLL_INIT_FAILED);
   end;

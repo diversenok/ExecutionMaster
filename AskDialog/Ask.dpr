@@ -32,8 +32,8 @@ resourcestring
 
 procedure Run;
 begin
-  if RunUnderDebuggerW(ParamsStartingFrom(1)) then
-    RunElevatedW(ParamsStartingFrom(1))
+  if RunIgnoringIFEO(ParamsStartingFrom(1)) then
+    RunElevated(ParamsStartingFrom(1))
   else
     ExitProcess(STATUS_DLL_INIT_FAILED);
 end;

@@ -30,7 +30,9 @@ Email      | diversenok@gmail.com
 Compiled   | Delphi XE8
 Version    | 0.8.15
 Date       | Aug 15, 2017
-Source     | [on GitHub](https://github.com/diversenok/ExecutionMaster)
+
+Probably, you should be able to compile it without any problems starting from
+Delphi XE2.
 
 ------------------------------------------------------------------------------
 

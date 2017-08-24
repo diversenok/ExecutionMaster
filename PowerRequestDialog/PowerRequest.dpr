@@ -48,8 +48,8 @@ begin
       SetThreadExecutionState(ES_SYSTEM_REQUIRED or ES_CONTINUOUS);
     end;
 
-    if RunUnderDebuggerW(ParamsStartingFrom(StartFrom)) then
-      RunElevatedW(ParamsStartingFrom(StartFrom))
+    if RunIgnoringIFEO(ParamsStartingFrom(StartFrom)) then
+      RunElevated(ParamsStartingFrom(StartFrom))
     else
       ExitProcess(STATUS_DLL_INIT_FAILED);
   except

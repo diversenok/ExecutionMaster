@@ -61,11 +61,11 @@ begin
       ExitProcess(STATUS_DLL_INIT_FAILED);
     SaferCloseLevel(hLevel);
 
-    if RunUnderDebuggerW(ParamsStartingFrom(StartFrom), hToken) then
+    if RunIgnoringIFEO(ParamsStartingFrom(StartFrom), hToken) then
       if IFEO_Enabled then
-        RunElevatedW(ParamsStartingFrom(StartFrom))
+        RunElevated(ParamsStartingFrom(StartFrom))
       else // We can't rely on Image-File-Execution-Options
-        RunElevatedW('"' + ParamStr(0) + '" ' + ParamsStartingFrom(1))
+        RunElevated('"' + ParamStr(0) + '" ' + ParamsStartingFrom(1))
         { The only way to launch program with restricted but elevated token is to
         start it from another instance of Drop.exe with higher privileges.}
     else
