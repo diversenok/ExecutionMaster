@@ -49,6 +49,13 @@ const
   'actions on %s' + #$D#$A + 'This program may start to work incorrectly. ' +
   'Are you sure?';
 
+var
+  ActionsExe: array [TAction] of string;
+
+const
+  ERR_ACTION = 'Can''t find executable file that performs specified action.' +
+    #$D#$A + 'Some components of Execution Master are missing.';
+
 type
   /// <summary>
   ///  Represents settings of a debugger to register with
@@ -135,9 +142,6 @@ resourcestring
 const
   ActionsRelExe: array [TAction] of string = (ActionRel0, ActionRel1,
     ActionRel2, ActionRel3, ActionRel4, ActionRel5, ActionRel6, '');
-
-var
-  ActionsExe: array [TAction] of string;
 
   { ShellApi }
 

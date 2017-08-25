@@ -70,6 +70,8 @@ const
   ERR_ONLYNAME = '"Executable name" should contain only file name, not a path.';
   ERR_ONLYNAME_CAPTION = 'Executable name';
 
+  ERR_ACTION_CAPTION = 'Specified action not found';
+
   ActionHints: array [TAction] of string =
     ('Ask user permission to launch executable',
      'Deny process to start and notify user',
@@ -158,6 +160,15 @@ procedure TExecListDialog.ButtonAddClick(Sender: TObject);
 var
   i: integer;
 begin
+  if not ActionButtons[aExecuteEx].Checked then
+    if not FileExists(Copy(ActionsExe[GetTAction], 2,
+      Pos('"', ActionsExe[GetTAction], 2) - 2)) then // Only file without params
+      begin
+        MessageBox(Handle, PChar(ERR_ACTION), PChar(ERR_ACTION_CAPTION),
+         MB_OK or MB_ICONERROR);
+        Exit;
+      end;
+
   if (Length(EditImage.Text) = 0) or (Pos('\', EditImage.Text) <> 0) or
      (Pos('/', EditImage.Text) <> 0) or (Pos('"', EditImage.Text) <> 0) then
   begin

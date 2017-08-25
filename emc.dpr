@@ -134,6 +134,10 @@ begin
   if a = Succ(High(TAction)) then
     raise Exception.Create('Unknown action.');
 
+  if not FileExists(Copy(ActionsExe[a], 2,
+    Pos('"', ActionsExe[a], 2) - 2)) then // Only file without params
+    raise Exception.Create(ERR_ACTION);
+
   CheckForProblems(ParamStr(2));
 
   if a = aExecuteEx then

@@ -28,8 +28,8 @@ Key        | Value
 Author     | © diversenok
 Email      | diversenok@gmail.com
 Compiled   | Delphi XE8
-Version    | 0.8.15
-Date       | Aug 15, 2017
+Version    | 0.8.15.3
+Date       | Aug 25, 2017
 
 Probably, you should be able to compile it without any problems starting from
 Delphi XE2.
