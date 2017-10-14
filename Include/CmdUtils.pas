@@ -17,10 +17,8 @@ unit CmdUtils;
 
 interface
 
-/// <summary>
-///   Preserves quotes for nonzero-index parameters.
-/// </summary>
-function ParamStr(const index: integer): string;
+function ParamStr(const index: integer;
+  PreservesQuotes: Boolean = False): string;
 function ParamCount:integer;
 
 /// <summary>
@@ -85,14 +83,21 @@ begin
   Result := Length(FStart) - 1;
 end;
 
-function ParamStr(const index: integer): string;
+function ParamStr(const index: integer;
+  PreservesQuotes: Boolean = False): string;
 begin
   if not FInitialized then
     Init;
   if index = 0 then
     Result := System.ParamStr(0)
   else if (Low(FStart) <= index) and (index <= High(FStart)) then
-    Result := Copy(FCmd, FStart[index], FEnd[index] - FStart[index] + 1)
+  begin
+    if not PreservesQuotes and
+      (FCmd[FStart[index]] = '"') and (FCmd[FEnd[index]] = '"') then
+      Result := Copy(FCmd, FStart[index] + 1, FEnd[index] - FStart[index] - 1)
+    else
+      Result := Copy(FCmd, FStart[index], FEnd[index] - FStart[index] + 1)
+  end
   else
     Result := '';
 end;

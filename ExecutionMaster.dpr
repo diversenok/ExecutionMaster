@@ -22,7 +22,8 @@ uses
   Vcl.Forms,
   UI in 'UI.pas' {ExecListDialog},
   IFEO in 'Include\IFEO.pas',
-  ProcessUtils in 'Include\ProcessUtils.pas';
+  ProcessUtils in 'Include\ProcessUtils.pas',
+  ShellMenu in 'Include\ShellMenu.pas';
 
 {$R *.res}
 

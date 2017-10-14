@@ -69,7 +69,7 @@ begin
     with Core[i] do
     begin
       if ParamCount >= 2 then
-        if not MatchesMask(TreatedFile, ParamStr(2)) then
+        if not MatchesMask(TreatedFile, ExtractFileName(ParamStr(2))) then
           Continue;
       writeln(Format('[-] Deleting action for %s', [TreatedFile]));
       Core.UnregisterDebugger(TreatedFile);
@@ -78,10 +78,6 @@ begin
     FreeAndNil(Core);
   end;
 end;
-
-const
-  ActionNames: array [TAction] of string = ('ask', 'deny', 'deny-quiet',
-    'drop', 'elevate', 'nosleep', 'display-on', 'execute');
 
 { We don't need to parse this part of command line — user is free at using
   quotes and spaces now. }
@@ -95,6 +91,7 @@ end;
 procedure CheckForProblems(S: String);
 const
   WARN = ' [y/n]: ';
+  ERR_CANCELED = 'Canceled by user.';
 var
   Answer: string;
   i: integer;
@@ -105,7 +102,7 @@ begin
       write(Format(WARN_SYSPROC + WARN, [S]));
       readln(Answer);
       if LowerCase(Answer) <> 'y' then
-        raise Exception.Create('Canceled by user.');
+        raise Exception.Create(ERR_CANCELED);
       Break;
     end;
 
@@ -115,7 +112,7 @@ begin
       write(Format(WARN_COMPAT + WARN, [S]));
       readln(Answer);
       if LowerCase(Answer) <> 'y' then
-        raise Exception.Create('Canceled by user.');
+        raise Exception.Create(ERR_CANCELED);
       break;
     end;
 end;
@@ -124,12 +121,13 @@ procedure ActionSet;
 var
   a: TAction;
   Dbg: TIFEORec;
+  executable: string;
 begin
   if ParamCount < 3 then
     raise Exception.Create('Not enough parameters.');
 
   for a := Low(TAction) to High(TAction) do
-    if LowerCase(ParamStr(3)) = ActionNames[a] then
+    if LowerCase(ParamStr(3)) = ActionShortNames[a] then
       Break;
   if a = Succ(High(TAction)) then
     raise Exception.Create('Unknown action.');
@@ -138,12 +136,13 @@ begin
     Pos('"', ActionsExe[a], 2) - 2)) then // Only file without params
     raise Exception.Create(ERR_ACTION);
 
-  CheckForProblems(ParamStr(2));
+  executable := ExtractFileName(ParamStr(2));
+  CheckForProblems(executable);
 
   if a = aExecuteEx then
-    Dbg := TIFEOREC.Create(a, ParamStr(2), GetExec)
+    Dbg := TIFEOREC.Create(a, executable, GetExec)
   else
-    Dbg := TIFEOREC.Create(a, ParamStr(2));
+    Dbg := TIFEOREC.Create(a, executable);
   writeln(Format('[+] %s --> %s', [Dbg.TreatedFile, Dbg.GetCaption]));
   TImageFileExecutionOptions.RegisterDebugger(Dbg);
 end;

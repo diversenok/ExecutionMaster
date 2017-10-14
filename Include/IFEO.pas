@@ -18,16 +18,26 @@ unit IFEO;
 
 interface
 
+uses Winapi.Windows;
+
 type
   TAction = (aAsk, aDeny, aDenySilent, aDrop, aElevate, aNoSleep, aDisplayOn,
     aExecuteEx);
   // Note: aExecuteEx should be the last action
 
 const
-  // In common case use GetCaption function of TIFEORec
+  // In common case use TIFEORec.GetCaption
   ActionCaptions: array [TAction] of string = ('Ask', 'Deny',
     'Deny (silent mode)', 'Drop admin rights', 'Elevate', 'No sleep until exit',
     'Force display on', 'Execute: ');
+
+  ActionCaptionsGUI: array [TAction] of string = ('&Ask', '&Deny',
+    'Deny (&silent mode)', 'Dro&p admin rights', '&Elevate',
+    'No sleep &until exit', 'Force d&isplay on', 'E&xecute: ');
+
+  // Command-line short names
+  ActionShortNames: array [TAction] of string = ('ask', 'deny', 'deny-silent',
+    'drop', 'elevate', 'nosleep', 'display-on', 'execute');
 
   /// <summary> You shouldn't mess with them. </summary>
   DangerousProcesses: array [0 .. 18] of string = ('csrss.exe', 'dwm.exe',
@@ -117,6 +127,10 @@ type
     property Debuggers[ind: integer]: TIFEORec read GetDebugger; default;
   end;
 
+procedure ElevetedExecute(const AWnd: HWND; const AFileName: WideString;
+  const AParameters: WideString = ''; WaitProcess: Boolean = False;
+  const npShow: integer = SW_HIDE);
+
 var
   /// <summary>
   ///  This handle is used with ShellExecuteEx.
@@ -127,7 +141,7 @@ var
 
 implementation
 
-uses Winapi.Windows, System.Win.Registry, System.Classes, System.SysUtils,
+uses System.Win.Registry, System.Classes, System.SysUtils,
   Winapi.ShellApi, ProcessUtils;
 
 resourcestring
@@ -145,10 +159,10 @@ const
 
   { ShellApi }
 
-function ElevetedExecute(const AWnd: HWND; const AFileName: WideString;
-  const AParameters: WideString = ''): Boolean;
+procedure ElevetedExecute;
 var
   ExecInfo: TShellExecuteInfoW;
+  ExitCode: Cardinal;
 begin
   { By the way: ShellExecuteEx initializes COM, so if we want to call it from
     secondary thread we should use CoUninitialize. Otherwise we will get
@@ -162,12 +176,24 @@ begin
     lpFile := PWideChar(AFileName);
     lpParameters := PWideChar(AParameters);
     lpDirectory := PWideChar(GetCurrentDir);
-    nShow := SW_HIDE;
+    nShow := npShow;
     fMask := SEE_MASK_FLAG_DDEWAIT or SEE_MASK_UNICODE;
     if AWnd <> 0 then
       fMask := fMask or SEE_MASK_FLAG_NO_UI;
+    if WaitProcess then
+      fMask := fMask or SEE_MASK_NOCLOSEPROCESS;
+    if not ShellExecuteExW(@ExecInfo) then
+      RaiseLastOSError;
+    if WaitProcess and (ExecInfo.hProcess <> 0) then
+    begin
+      WaitForSingleObject(hProcess, INFINITE);
+      GetExitCodeProcess(hProcess, ExitCode);
+      CloseHandle(hProcess);
+      if ExitCode <> 0 then
+        raise Exception.Create('Process exited with error code: ' +
+          IntToStr(ExitCode));
+    end;
   end;
-  Result := ShellExecuteExW(@ExecInfo);
 end;
 
   { TImageFileOptionsRec }
@@ -285,10 +311,8 @@ begin
       reg.Free;
     end
   end
-  else if not ElevetedExecute(ElvationHandle, REG_EXE, Format(PARAMS,
-    [GetKey(Debugger.TreatedFile), EscapeStr(Debugger.ExecStr)]))
-  then
-    RaiseLastOSError;
+  else ElevetedExecute(ElvationHandle, REG_EXE, Format(PARAMS,
+    [GetKey(Debugger.TreatedFile), EscapeStr(Debugger.ExecStr)]));
 end;
 
 class procedure TImageFileExecutionOptions.UnregisterDebugger;
@@ -318,9 +342,8 @@ begin
       reg.Free;
     end
   end
-  else if not ElevetedExecute(ElvationHandle, REG_EXE,
-    Format(GetParams, [GetKey(ATreatedFile)])) then
-    RaiseLastOSError;
+  else ElevetedExecute(ElvationHandle, REG_EXE,
+    Format(GetParams, [GetKey(ATreatedFile)]));
 end;
 
   { TImageFileExecutionOptions object }

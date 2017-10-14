@@ -5,10 +5,14 @@ program launch using several standard actions:
  - **Deny** program execution (2 modes: notify user and not);
  - **Drop** administrative privileges of specified program;
  - Request **elevation** for the program at every launch;
- - Force system **not to sleep** / **display to be on** while selected prorgam works;
+ - Force system **not to sleep** / **display to be on** while selected program works;
  - **Execute** another program instead of specified.
 
 ![](https://habrastorage.org/web/2f2/7d8/3af/2f27d83af36747068f3e9a5e9d857b39.png)
+
+The latest version also contains shell extension:
+
+![](https://habrastorage.org/webt/59/e2/37/59e237990d931309633594.png)
 
 ### Release content:
 
@@ -18,7 +22,7 @@ See [releases](https://github.com/diversenok/ExecutionMaster/releases) page
  - **emc.exe** — console tool for configuration;
  - **Actions** folder with actions executables described above.
 
-**Note:** if you have x64 version of Windows use x64 version of program.
+**Note:** if you have x64 version of Windows use x64 version of the program.
 Not all actions of x86 Execution Master will work correctly on Windows x64.
 
 Program was tested on Windows 7, 8 and 10.
@@ -28,8 +32,8 @@ Key        | Value
 Author     | © diversenok
 Email      | diversenok@gmail.com
 Compiled   | Delphi XE8
-Version    | 0.8.15.3
-Date       | Aug 25, 2017
+Version    | 0.10.14.0
+Date       | Oct 14, 2017
 
 Probably, you should be able to compile it without any problems starting from
 Delphi XE2.

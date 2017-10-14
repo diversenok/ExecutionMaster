@@ -24,6 +24,8 @@ uses
   ProcessUtils in '..\Include\ProcessUtils.pas',
   CmdUtils in '..\Include\CmdUtils.pas';
 
+//TODO: Set integrity to medium. See tokprp.c near line 870 from ProcessHacker
+
 const
   IFEO_KEY = '/IFEO'; // Makes sure we were launched from IFEO
 

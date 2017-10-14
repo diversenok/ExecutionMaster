@@ -41,14 +41,13 @@
     <PropertyGroup Condition="'$(Base)'!=''">
         <DCC_PEOSVersion>6.0</DCC_PEOSVersion>
         <DCC_PESubSysVersion>6.0</DCC_PESubSysVersion>
-        <VerInfo_Build>3</VerInfo_Build>
         <Icon_MainIcon>Ask.ico</Icon_MainIcon>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
-        <VerInfo_MinorVer>8</VerInfo_MinorVer>
+        <VerInfo_MinorVer>10</VerInfo_MinorVer>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Release>15</VerInfo_Release>
+        <VerInfo_Release>14</VerInfo_Release>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Asks user before executing programs;FileVersion=0.8.15.3;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=;OriginalFilename=Ask.exe;ProductName=Execution Master component: Ask;ProductVersion=0.8;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Asks user before executing programs;FileVersion=0.10.14.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=;OriginalFilename=Ask.exe;ProductName=Execution Master component: Ask;ProductVersion=0.10;Comments=</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <SanitizedProjectName>Ask</SanitizedProjectName>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
@@ -532,13 +531,13 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
             <Platforms>
                 <Platform value="Android">False</Platform>

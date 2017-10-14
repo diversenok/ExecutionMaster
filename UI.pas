@@ -21,7 +21,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes,
   VCL.Graphics, VCL.Controls, VCL.Forms, VCL.Dialogs, VCL.ComCtrls,
-  VCL.StdCtrls, VCL.ExtCtrls, VCL.Buttons, IFEO;
+  VCL.StdCtrls, VCL.ExtCtrls, VCL.Buttons, Vcl.Menus, IFEO;
 
 type
   TExecListDialog = class(TForm)
@@ -41,6 +41,14 @@ type
     ButtonDelete: TButton;
     ButtonAdd: TButton;
     PanelAdd: TPanel;
+    MainMenu: TMainMenu;
+    MenuFile: TMenuItem;
+    MenuRunAsAdmin: TMenuItem;
+    MenuSource: TMenuItem;
+    N1: TMenuItem;
+    MenuReg: TMenuItem;
+    MenuUnreg: TMenuItem;
+    N2: TMenuItem;
     procedure ActionButtonsClick(Sender: TObject);
     procedure ButtonBrowseClick(Sender: TObject);
     procedure ButtonBrowseExecClick(Sender: TObject);
@@ -50,6 +58,10 @@ type
     procedure FormCreate(Sender: TObject);
     procedure ListViewExecChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
+    procedure MenuRunAsAdminClick(Sender: TObject);
+    procedure MenuRegClick(Sender: TObject);
+    procedure MenuUnregClick(Sender: TObject);
+    procedure MenuSourceClick(Sender: TObject);
   private
     Core: TImageFileExecutionOptions;
     ActionButtons: array [TAction] of TRadioButton;
@@ -61,9 +73,11 @@ var
 
 implementation
 
-uses ProcessUtils;
+uses ProcessUtils, Winapi.ShellApi, ShellMenu;
 
 const
+  GITHUB_PAGE = 'https://github.com/diversenok/ExecutionMaster';
+
   WARN_SYSPROC_CAPTION = 'System process';
   WARN_COMPAT_CAPTION = 'Compatibility problems';
 
@@ -81,6 +95,12 @@ const
      'Force computer not to sleep until process exits',
      'Force display to be on until process exits',
      'Execute another program instead');
+
+  ERR_EMC = 'Command-line tool emc.exe is missing.';
+
+  INFO_REG = 'Shell extension was successfully registered.';
+  INFO_UNREG = 'Shell extension was successfully uninstalled.';
+  INFO_REG_CAPTION = 'Success';
 
 {$R *.dfm}
 
@@ -117,11 +137,7 @@ begin
     with ListViewExec.Items.Add do
     begin
       Caption := Core.Debuggers[i].TreatedFile;
-      if Core.Debuggers[i].Action = aExecuteEx then
-        SubItems.Add(ActionCaptions[Core.Debuggers[i].Action] +
-          Core.Debuggers[i].ExecStr)
-      else
-        SubItems.Add(ActionCaptions[Core.Debuggers[i].Action]);
+      SubItems.Add(Core.Debuggers[i].GetCaption)
     end;
   ListViewExec.Items.EndUpdate;
 end;
@@ -217,7 +233,7 @@ begin
   for a := Low(ActionButtons) to High(ActionButtons) do
   begin
     ActionButtons[a] := TRadioButton.Create(GroupBoxAction);
-    ActionButtons[a].Caption := ActionCaptions[a];
+    ActionButtons[a].Caption := ActionCaptionsGUI[a];
     ActionButtons[a].Width := 220;
     ActionButtons[a].Top := 20 + 21 * Integer(a);
     ActionButtons[a].Left := 10;
@@ -232,13 +248,53 @@ begin
   GroupBoxAction.Height := 96 + 21 * Length(ActionButtons);
   ClientHeight := GroupBoxAction.Top + GroupBoxAction.Height + 3;
   Constraints.MinHeight := Height;
+  MenuRunAsAdmin.Enabled := not ProcessIsElevated;
   if not ProcessIsElevated then
-  begin
+  begin // UAC Shield on buttons
     SendMessage(ButtonDelete.Handle, BCM_SETSHIELD, 0, 1);
     SendMessage(ButtonAdd.Handle, BCM_SETSHIELD, 0, 1);
   end;
 
   Refresh(Sender);
+end;
+
+{ Menu items}
+
+procedure TExecListDialog.MenuRunAsAdminClick(Sender: TObject);
+begin
+  ElevetedExecute(Handle, ParamStr(0), '', False, SW_SHOWNORMAL);
+  Close;
+end;
+
+procedure TExecListDialog.MenuRegClick(Sender: TObject);
+begin
+  if not FileExists(ExtractFilePath(ParamStr(0)) + 'emc.exe') then
+    raise Exception.Create(ERR_EMC);
+  RegShellMenu;
+  MessageBox(Handle, INFO_REG, INFO_REG_CAPTION, MB_OK or MB_ICONINFORMATION);
+end;
+
+procedure TExecListDialog.MenuUnregClick(Sender: TObject);
+begin
+  UnregShellMenu;
+  MessageBox(Handle, INFO_UNREG, INFO_REG_CAPTION, MB_OK or MB_ICONINFORMATION);
+end;
+
+procedure TExecListDialog.MenuSourceClick(Sender: TObject);
+var
+  ExecInfo: TShellExecuteInfoW;
+begin
+  FillChar(ExecInfo, SizeOf(ExecInfo), 0);
+  with ExecInfo do
+  begin
+    cbSize := SizeOf(ExecInfo);
+    Wnd := Handle;
+    lpVerb := PWideChar('open');
+    lpFile := PWideChar(GITHUB_PAGE);
+    fMask := SEE_MASK_FLAG_DDEWAIT or SEE_MASK_UNICODE or SEE_MASK_FLAG_NO_UI;
+    if not ShellExecuteExW(@ExecInfo) then
+      RaiseLastOSError;
+  end;
 end;
 
 end.

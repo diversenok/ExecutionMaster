@@ -12,6 +12,8 @@
 ' - Force system not to sleep / display to be on while selected prorgam works;'#$D#$A +
 ' - Execute another program instead of specified.'#$D#$A +
 ''#$D#$A +
+'Source code: https://github.com/diversenok/ExecutionMaster'#$D#$A +
+''#$D#$A +
 'Usage: emc.exe [query|set|reset] [[parameters]]'#$D#$A +
 ''#$D#$A +
 ' query: Lists all programs with specified actions according to the mask.'#$D#$A +
@@ -31,7 +33,7 @@
 '  Note:'#$D#$A +
 '   This will overwrite existing setting for specified file.'#$D#$A +
 '  Parameters:'#$D#$A +
-'   file => File name without path to be intercepted'#$D#$A +
+'   file => Filename with/without path to be intercepted. (Path is ignored now)'#$D#$A +
 '   action => [ask|deny|deny-silent|drop|elevate|nosleep|display-on|execute]'#$D#$A +
 '   another_file => Full name of an another executable file with path'#$D#$A +
 '     (recommended to quote it) and parameters separated by spaces. Use'#$D#$A +
