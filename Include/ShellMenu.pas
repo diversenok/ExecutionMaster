@@ -52,6 +52,7 @@ begin
         WriteString('Icon', '"' + emc + '",0');
         WriteString('MUIVerb', 'Set &launch action');
         WriteString('ExtendedSubCommandsKey', 'exefile\shell\EMC');
+        WriteString('HasLUAShield', '');
         CloseKey;
         OpenKey(Format(K1, [0]), True);
         WriteString('MUIVerb', '&None');
