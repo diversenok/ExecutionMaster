@@ -1,11 +1,14 @@
-﻿**Execution Master** is a program for Windows that allows you to configure any
-program launch using several standard actions:
+﻿## Execution Master
+
+**Execution Master** is a utility for Windows that allows you to gain more
+control over running any specified program regardless of who and how tried to
+run it. You can assign one of the several standard actions for it:
 
  - **Ask** user to confirm program execution;
  - **Deny** program execution (2 modes: notify user and not);
  - **Drop** administrative privileges of specified program;
  - Request **elevation** for the program at every launch;
- - Force system **not to sleep** / **display to be on** while selected program works;
+ - Force system **not to sleep** / **display to be on** while the selected program works;
  - **Execute** another program instead of specified.
 
 ![](https://habrastorage.org/web/2f2/7d8/3af/2f27d83af36747068f3e9a5e9d857b39.png)
@@ -14,7 +17,7 @@ The latest version also contains shell extension:
 
 ![](https://habrastorage.org/webt/59/e2/37/59e237990d931309633594.png)
 
-### Release content:
+## Downloads
 
 See [releases](https://github.com/diversenok/ExecutionMaster/releases) page
 
@@ -22,21 +25,29 @@ See [releases](https://github.com/diversenok/ExecutionMaster/releases) page
  - **emc.exe** — console tool for configuration;
  - **Actions** folder with actions executables described above.
 
-**Note:** if you have x64 version of Windows use x64 version of the program.
-Not all actions of x86 Execution Master will work correctly on Windows x64.
+**Note:** if you have x64 (aka 64-bit) version of Windows use x64 version of the program.
+Not all actions of x86 (aka 32-bit) Execution Master will work correctly on Windows x64.
 
-Program was tested on Windows 7, 8 and 10.
+The program was tested on Windows 7, 8 and 10.
 
 Key        | Value
 ---------- | -----
 Author     | © diversenok
-Email      | diversenok@gmail.com
+Email      | diversenok@gmail.com (English and Russian are suitable)
 Compiled   | Delphi XE8
 Version    | 0.10.14.0
 Date       | Oct 14, 2017
 
 Probably, you should be able to compile it without any problems starting from
 Delphi XE2.
+
+## How it works
+
+This software uses internal Windows mechanism that is called **Image File
+Execution Options** to intercept process creation and automatically launch a
+debugger for the specified program. These small utilities from *Actions* folder
+are designed to be set as such debuggers so they can perform some special activity
+before approving the creation of the original process.
 
 ------------------------------------------------------------------------------
 
