@@ -43,17 +43,22 @@ procedure ActionQuery;
 var
   Core: TImageFileExecutionOptions;
   i: integer;
+  Found: Boolean;
 begin
+  Found := False;
   try
     Core := TImageFileExecutionOptions.Create;
     for i := 0 to Core.Count - 1 do
-    with Core[i] do
+      with Core[i] do
       begin
         if ParamCount >= 2 then
           if not MatchesMask(TreatedFile, ParamStr(2)) then
             Continue;
         writeln(Format('[*] %s --> %s', [TreatedFile, GetCaption]));
+        Found := True;
       end;
+    if not Found then
+      writeln('Nothing found.');
   finally
     FreeAndNil(Core);
   end;
@@ -64,17 +69,17 @@ var
   Core: TImageFileExecutionOptions;
   i: integer;
 begin
-  Core := TImageFileExecutionOptions.Create;
   try
+    Core := TImageFileExecutionOptions.Create;
     for i := 0 to Core.Count - 1 do
-    with Core[i] do
-    begin
-      if ParamCount >= 2 then
-        if not MatchesMask(TreatedFile, ExtractFileName(ParamStr(2))) then
-          Continue;
-      writeln(Format('[-] Deleting action for %s', [TreatedFile]));
-      Core.UnregisterDebugger(TreatedFile);
-    end;
+      with Core[i] do
+      begin
+        if ParamCount >= 2 then
+          if not MatchesMask(TreatedFile, ExtractFileName(ParamStr(2))) then
+            Continue;
+        writeln(Format('[-] Deleting action for %s', [TreatedFile]));
+        Core.UnregisterDebugger(TreatedFile);
+      end;
   finally
     FreeAndNil(Core);
   end;
@@ -114,7 +119,7 @@ begin
       readln(Answer);
       if LowerCase(Answer) <> 'y' then
         raise Exception.Create(ERR_CANCELED);
-      break;
+      Break;
     end;
 end;
 
@@ -130,20 +135,20 @@ begin
   for a := Low(TAction) to High(TAction) do
     if LowerCase(ParamStr(3)) = ActionShortNames[a] then
       Break;
-  if a = Succ(High(TAction)) then
+  if a = Succ(High(TAction)) then // for cycle finished without breaking
     raise Exception.Create('Unknown action.');
 
-  if not FileExists(Copy(ActionsExe[a], 2,
-    Pos('"', ActionsExe[a], 2) - 2)) then // Only file without params
+  if not FileExists(Copy(ActionsExe[a], 2, Pos('"', ActionsExe[a], 2) - 2)) then
+    // Only file without params
     raise Exception.Create(ERR_ACTION);
 
   executable := ExtractFileName(ParamStr(2));
   CheckForProblems(executable);
 
   if a = aExecuteEx then
-    Dbg := TIFEOREC.Create(a, executable, GetExec)
+    Dbg := TIFEORec.Create(a, executable, GetExec)
   else
-    Dbg := TIFEOREC.Create(a, executable);
+    Dbg := TIFEORec.Create(a, executable);
   writeln(Format('[+] %s --> %s', [Dbg.TreatedFile, Dbg.GetCaption]));
   TImageFileExecutionOptions.RegisterDebugger(Dbg);
 end;
@@ -151,11 +156,11 @@ end;
 begin
   try
     write('ExecutionMaster ');
-    {$IFDEF WIN64}
-      write('x64');
-    {$ELSE}
-      write('x86');
-    {$ENDIF}
+{$IFDEF WIN64}
+    write('x64');
+{$ELSE}
+    write('x86');
+{$ENDIF}
     writeln(' [console] v0.8 Copyright (C) 2017 diversenok');
     if IsElevated then
       writeln('Current process: elevated')
