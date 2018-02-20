@@ -1,5 +1,5 @@
 {   ExecutionMaster component.
-    Copyright (C) 2017 diversenok 
+    Copyright (C) 2017-2018 diversenok 
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@ uses
   UI in 'UI.pas' {ExecListDialog},
   IFEO in 'Include\IFEO.pas',
   ProcessUtils in 'Include\ProcessUtils.pas',
-  ShellMenu in 'Include\ShellMenu.pas';
+  ShellMenu in 'Include\ShellMenu.pas',
+  Registry2 in 'Include\Registry2.pas';
 
 {$R *.res}
 

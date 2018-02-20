@@ -1,5 +1,5 @@
 {   ExecutionMaster component.
-    Copyright (C) 2017 diversenok
+    Copyright (C) 2017-2018 diversenok
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -141,8 +141,7 @@ var
 
 implementation
 
-uses System.Win.Registry, System.Classes, System.SysUtils,
-  Winapi.ShellApi, ProcessUtils;
+uses System.SysUtils, Winapi.ShellApi, ProcessUtils, Registry2;
 
 resourcestring
   ActionRel0 = '"%sActions\Ask.exe"';
@@ -264,32 +263,24 @@ end;
 class function TImageFileExecutionOptions.NeedDeleteValueOnly;
 var
   reg: TRegistry;
-  AllKeys, AllValues: TStringList;
-  i: integer;
+  KeyInfo: TRegKeyInfo;
 begin
   Result := True;
   reg := TRegistry.Create(KEY_READ);
-  AllKeys := TStringList.Create;
-  AllValues := TStringList.Create;
   try
-
     reg.RootKey := HKEY_LOCAL_MACHINE;
     if not reg.OpenKey(GetKey(ATreatedFile), False) then
       raise Exception.Create('DeleteValueOnly::TRegistry.OpenKey failed');
 
-    // Collection all setting for specified program
-    reg.GetKeyNames(AllKeys);
-    reg.GetValueNames(AllValues);
+    if not reg.ValueExists(REG_VALUE) then
+      raise Exception.Create('There is no action set already.');
 
-    // Searching for settings that we don't want to delete
-    Result := reg.ValueExists('') or (AllKeys.Count > 0);
-    for i := 1 to AllValues.Count - 1 do
-      if AllValues[i] <> REG_VALUE then
-        Result := True;
+    if not reg.GetKeyInfo(KeyInfo) then
+      raise Exception.Create('DeleteValueOnly::TRegistry.GetKeyInfo failed');
+
+    Result := (KeyInfo.NumSubKeys <> 0) or (KeyInfo.NumValues > 1);
   finally
     reg.Free;
-    AllKeys.Free;
-    AllValues.Free;
   end;
 end;
 
@@ -357,7 +348,7 @@ end;
 constructor TImageFileExecutionOptions.Create;
 var
   reg: TRegistry;
-  AllKeys: TStringList;
+  AllKeys: TStringArray;
   i: integer;
 begin
   SetLength(Arr, 0);
@@ -367,12 +358,11 @@ begin
     Exit;
 
   // Collecting all executables with special settings
-  AllKeys := TStringList.Create;
   reg.GetKeyNames(AllKeys);
   reg.CloseKey;
 
   // Finding and saving debugged ones
-  for i := 0 to AllKeys.Count - 1 do
+  for i := 0 to High(AllKeys) do
   begin
     reg.OpenKey(REG_KEY + '\' + AllKeys[i], False);
     if reg.ValueExists(REG_VALUE) then
@@ -382,7 +372,6 @@ begin
       end;
     reg.CloseKey;
   end;
-  AllKeys.Free;
   reg.Free;
 end;
 

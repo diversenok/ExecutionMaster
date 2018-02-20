@@ -1,5 +1,5 @@
 {   ExecutionMaster component.
-    Copyright (C) 2017 diversenok 
+    Copyright (C) 2017-2018 diversenok 
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,8 @@ uses
   System.Masks,
   IFEO in 'Include\IFEO.pas',
   ProcessUtils in 'Include\ProcessUtils.pas',
-  CmdUtils in 'Include\CmdUtils.pas';
+  CmdUtils in 'Include\CmdUtils.pas',
+  Registry2 in 'Include\Registry2.pas';
 
 resourcestring
   USAGE = {$INCLUDE emcusage.txt};

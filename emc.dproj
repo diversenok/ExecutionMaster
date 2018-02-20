@@ -112,6 +112,7 @@
         <DCCReference Include="Include\IFEO.pas"/>
         <DCCReference Include="Include\ProcessUtils.pas"/>
         <DCCReference Include="Include\CmdUtils.pas"/>
+        <DCCReference Include="Include\Registry2.pas"/>
         <None Include="emcusage.txt"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
