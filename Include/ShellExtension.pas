@@ -1,5 +1,5 @@
 {   ExecutionMaster component.
-    Copyright (C) 2017 diversenok
+    Copyright (C) 2017-2018 diversenok
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,13 +19,13 @@ unit ShellExtension;
 interface
 
 /// <summary> Adds shell context menu with actipons list. </summary>
-procedure RegShellMenu;
+procedure RegShellMenu(ShellExe: string);
 /// <summary> Removes shell context menu items. </summary>
 procedure UnregShellMenu;
 
 implementation
 
-uses System.SysUtils, Winapi.Windows, System.Win.Registry, IFEO;
+uses System.SysUtils, Winapi.Windows, Registry2, IFEO;
 
 const
   K0 = 'Software\Classes\exefile\shell\EMc'; // HKCU
@@ -34,12 +34,11 @@ const
 // Extracts only file from ActionsExe
 function GetIcon(S: string): string;
 begin
-  Result := Copy(S, 1, S.LastDelimiter('"') + 1) + ',0';
+  Result := Copy(S, 1, LastDelimiter('"', S)) + ',0';
 end;
 
-procedure RegShellMenu;
+procedure RegShellMenu(ShellExe: string);
 var
-  emc: string;
   a: TAction;
 begin
   with TRegistry.Create do
@@ -48,8 +47,7 @@ begin
         RootKey := HKEY_CURRENT_USER;
         if not OpenKey(K0, True) then
           raise Exception.Create('Unable to create registry key.');
-        emc := ExtractFilePath(ParamStr(0)) + 'emc.exe';
-        WriteString('Icon', '"' + emc + '",0');
+        WriteString('Icon', '"' + ShellExe + '",0');
         WriteString('MUIVerb', 'Set &launch action');
         WriteString('ExtendedSubCommandsKey', 'exefile\shell\EMC');
         WriteString('HasLUAShield', '');
@@ -57,7 +55,7 @@ begin
         OpenKey(Format(K1, [0]), True);
         WriteString('MUIVerb', '&None');
         OpenKey('command', True);
-        WriteString('', '"' + emc + '" reset "%1"');
+        WriteString('', '"' + ShellExe + '" reset "%1"');
         CloseKey;
         for a := Low(TAction) to Pred(High(TAction)) do
         begin
@@ -65,7 +63,7 @@ begin
           WriteString('Icon', GetIcon(ActionsExe[a]));
           WriteString('MUIVerb', ActionCaptionsGUI[a]);
           OpenKey('command', True);
-          WriteString('', '"' + emc + '" set "%1" ' + ActionShortNames[a]);
+          WriteString('', '"' + ShellExe + '" set "%1" ' + ActionShortNames[a]);
           CloseKey;
         end;
       end;
@@ -80,8 +78,9 @@ begin
     try
     begin
       RootKey := HKEY_CURRENT_USER;
-      if not DeleteKey(K0) then
-        raise Exception.Create('Unable to delete registry key.');
+      if KeyExists(K0) then
+        if not DeleteKey(K0) then
+          raise Exception.Create('Unable to delete registry key.');
     end;
     finally
       Free;

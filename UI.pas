@@ -1,5 +1,5 @@
 {   ExecutionMaster component.
-    Copyright (C) 2017 diversenok 
+    Copyright (C) 2017-2018 diversenok 
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -78,9 +78,6 @@ uses ProcessUtils, Winapi.ShellApi, ShellExtension;
 const
   GITHUB_PAGE = 'https://github.com/diversenok/ExecutionMaster';
 
-  WARN_SYSPROC_CAPTION = 'System process';
-  WARN_COMPAT_CAPTION = 'Compatibility problems';
-
   ERR_ONLYNAME = '"Executable name" should contain only file name, not a path.';
   ERR_ONLYNAME_CAPTION = 'Executable name';
 
@@ -96,7 +93,7 @@ const
      'Force display to be on until process exits',
      'Execute another program instead');
 
-  ERR_EMC = 'Command-line tool emc.exe is missing.';
+  ERR_EMCSHELL = 'EMCShell component is missing.';
 
   INFO_REG = 'Shell extension was successfully registered.';
   INFO_UNREG = 'Shell extension was successfully uninstalled.';
@@ -268,9 +265,9 @@ end;
 
 procedure TExecListDialog.MenuRegClick(Sender: TObject);
 begin
-  if not FileExists(ExtractFilePath(ParamStr(0)) + 'emc.exe') then
-    raise Exception.Create(ERR_EMC);
-  RegShellMenu;
+  if not FileExists(ExtractFilePath(ParamStr(0)) + 'EMCShell.exe') then
+    raise Exception.Create(ERR_EMCSHELL);  
+  RegShellMenu(ExtractFilePath(ParamStr(0)) + 'EMCShell.exe');
   MessageBox(Handle, INFO_REG, INFO_REG_CAPTION, MB_OK or MB_ICONINFORMATION);
 end;
 

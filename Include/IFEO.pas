@@ -47,17 +47,19 @@ const
     'consent.exe', 'dllhost.exe');
 
   /// <summary> Warning for <c>DangerousProcesses</c>. </summary>
-  WARN_SYSPROC = '%s is a system process. Performing this action may ' +
+  WARN_SYSPROC = '%s is a part of the system. Performing this action may ' +
     'cause system instability. Are you sure?';
+  WARN_SYSPROC_CAPTION = 'System component';
 
   /// <summary> Some compatibility problems with specified processes. </summary>
   CompatibilityProblems: array [0 .. 2] of String = ('chrome.exe',
     'firefox.exe', 'browser.exe');
 
   /// <summary> Warning for <c>CompatibilityProblems</c>. </summary>
-  WARN_COMPAT = 'There are several compatibility problems with setting ' +
+  WARN_COMPAT = 'There are some compatibility problems with setting ' +
   'actions on %s' + #$D#$A + 'This program may start to work incorrectly. ' +
   'Are you sure?';
+  WARN_COMPAT_CAPTION = 'Compatibility problems';
 
 var
   ActionsExe: array [TAction] of string;

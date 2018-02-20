@@ -6,6 +6,9 @@
         <Projects Include="ExecutionMaster.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="EMCShell.dproj">
+            <Dependencies/>
+        </Projects>
         <Projects Include="emc.dproj">
             <Dependencies/>
         </Projects>
@@ -40,6 +43,15 @@
     </Target>
     <Target Name="ExecutionMaster:Make">
         <MSBuild Projects="ExecutionMaster.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EMCShell">
+        <MSBuild Projects="EMCShell.dproj"/>
+    </Target>
+    <Target Name="EMCShell:Clean">
+        <MSBuild Projects="EMCShell.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EMCShell:Make">
+        <MSBuild Projects="EMCShell.dproj" Targets="Make"/>
     </Target>
     <Target Name="emc">
         <MSBuild Projects="emc.dproj"/>
@@ -96,13 +108,13 @@
         <MSBuild Projects="PowerRequestDialog\PowerRequest.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="ExecutionMaster;emc;Ask;Deny;Drop;Elevate;PowerRequest"/>
+        <CallTarget Targets="ExecutionMaster;EMCShell;emc;Ask;Deny;Drop;Elevate;PowerRequest"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="ExecutionMaster:Clean;emc:Clean;Ask:Clean;Deny:Clean;Drop:Clean;Elevate:Clean;PowerRequest:Clean"/>
+        <CallTarget Targets="ExecutionMaster:Clean;EMCShell:Clean;emc:Clean;Ask:Clean;Deny:Clean;Drop:Clean;Elevate:Clean;PowerRequest:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="ExecutionMaster:Make;emc:Make;Ask:Make;Deny:Make;Drop:Make;Elevate:Make;PowerRequest:Make"/>
+        <CallTarget Targets="ExecutionMaster:Make;EMCShell:Make;emc:Make;Ask:Make;Deny:Make;Drop:Make;Elevate:Make;PowerRequest:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
