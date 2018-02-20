@@ -23,7 +23,7 @@ uses
   UI in 'UI.pas' {ExecListDialog},
   IFEO in 'Include\IFEO.pas',
   ProcessUtils in 'Include\ProcessUtils.pas',
-  ShellMenu in 'Include\ShellMenu.pas',
+  ShellExtension in 'Include\ShellExtension.pas',
   Registry2 in 'Include\Registry2.pas';
 
 {$R *.res}

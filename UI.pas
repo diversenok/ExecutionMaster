@@ -73,7 +73,7 @@ var
 
 implementation
 
-uses ProcessUtils, Winapi.ShellApi, ShellMenu;
+uses ProcessUtils, Winapi.ShellApi, ShellExtension;
 
 const
   GITHUB_PAGE = 'https://github.com/diversenok/ExecutionMaster';
