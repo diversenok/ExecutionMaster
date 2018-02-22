@@ -411,13 +411,19 @@ begin
   Result := Length(Arr);
 end;
 
+procedure DoInitialization;
 var
   a: TAction;
-
-initialization
+begin
   ProcessIsElevated := ProcessUtils.IsElevated;
+  // TODO -cInstaller: Moving actions to Common Files
+  // CommonFiles := GetEnvironmentVariable('CommonProgramFiles') + '\';
   for a := Low(ActionsExe) to Pred(High(ActionsExe)) do
     ActionsExe[a] := Format(ActionsRelExe[a], [ExtractFilePath(ParamStr(0))]);
   { ExtractFileDir behave different at drive root and other folders.
     So ExtractFilePath is better}
+end;
+
+initialization
+  DoInitialization;
 end.
