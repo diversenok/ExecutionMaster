@@ -9,7 +9,7 @@
 ' - Deny program execution (2 modes: notify user and not);'#$D#$A +
 ' - Drop administrative privileges of specified program;'#$D#$A +
 ' - Request elevation for the program at every launch;'#$D#$A +
-' - Force system not to sleep / display to be on while selected prorgam works;'#$D#$A +
+' - Force system not to sleep / display to be on while selected program works;'#$D#$A +
 ' - Execute another program instead of specified.'#$D#$A +
 ''#$D#$A +
 'Source code: https://github.com/diversenok/ExecutionMaster'#$D#$A +
@@ -23,9 +23,9 @@
 '   mask => ? matches one symbol and * matches any count of symbols'#$D#$A +
 '  Examples:'#$D#$A +
 '   > emc query *'#$D#$A +
-'    Will list all settings'#$D#$A +
+'    Will list all settings.'#$D#$A +
 '   > emc query f*.exe'#$D#$A +
-'    Will list "file.exe" but not "executable.exe"'#$D#$A +
+'    Will list "file.exe" but not "executable.exe".'#$D#$A +
 ''#$D#$A +
 ' set: Registers specified action for specified file.'#$D#$A +
 ' ==='#$D#$A +
@@ -33,7 +33,8 @@
 '  Note:'#$D#$A +
 '   This will overwrite existing setting for specified file.'#$D#$A +
 '  Parameters:'#$D#$A +
-'   file => Filename with/without path to be intercepted. (Path is ignored now)'#$D#$A +
+'   file => Filename with/without a path to be intercepted. (Path is ignored'#$D#$A +
+'     in current version). If the filename contains spaces put it in qoutes.'#$D#$A +
 '   action => [ask|deny|deny-silent|drop|elevate|nosleep|display-on|execute]'#$D#$A +
 '   another_file => Full name of an another executable file with path'#$D#$A +
 '     (recommended to quote it) and parameters separated by spaces. Use'#$D#$A +
@@ -42,9 +43,9 @@
 '     will be passed without any changes.'#$D#$A +
 '  Examples:'#$D#$A +
 '   > emc set taskmgr.exe elevate'#$D#$A +
-'    Now all executions of taskmgr.exe will request elevation'#$D#$A +
-'   > emc set mshta.exe deny'#$D#$A +
-'    Now noone can run mshta.exe'#$D#$A +
+'    Now all executions of taskmgr.exe will request elevation.'#$D#$A +
+'   > emc set "Launch me.exe" deny'#$D#$A +
+'    Now noone can run this suspicious file.'#$D#$A +
 '   > emc set BSA.exe drop'#$D#$A +
 '    Now BSA.exe will run only with restricted privileges even after UAC.'#$D#$A +
 '   > emc set notepad.exe execute "C:\Program Files\AkelPad\AkelPad.exe" /z'#$D#$A +
@@ -57,6 +58,6 @@
 '   mask => ? matches one symbol and * matches any count of symbols  '#$D#$A +
 '  Examples:'#$D#$A +
 '   > emc reset *'#$D#$A +
-'    Will clear all saved actions for all files'#$D#$A +
+'    Will clear all saved actions for all files.'#$D#$A +
 '   > emc reset notepad.exe'#$D#$A +
-'    Will clear action only for notepad.exe'
+'    Will clear action only for notepad.exe.'
