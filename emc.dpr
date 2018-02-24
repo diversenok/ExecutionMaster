@@ -161,7 +161,7 @@ begin
 {$ELSE}
     write('x86');
 {$ENDIF}
-    writeln(' [console] v0.8 Copyright (C) 2017 diversenok');
+    writeln(' [console] v1.2 Copyright (C) 2017-2018 diversenok');
     if IsElevated then
       writeln('Current process: elevated')
     else

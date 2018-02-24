@@ -49,10 +49,10 @@
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
-        <VerInfo_Release>12</VerInfo_Release>
-        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Shell context menu handler for ExecutionMaster;FileVersion=1.1.12.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=;OriginalFilename=EMCShell.exe;ProductName=Execution Master: shell extension;ProductVersion=1.1.12.0;Comments=</VerInfo_Keys>
+        <VerInfo_Release>24</VerInfo_Release>
+        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Shell context menu handler for ExecutionMaster;FileVersion=1.2.24.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/;OriginalFilename=EMCShell.exe;ProductName=Execution Master: shell extension;ProductVersion=1.2;Comments=</VerInfo_Keys>
         <SanitizedProjectName>EMCShell</SanitizedProjectName>
-        <VerInfo_MinorVer>1</VerInfo_MinorVer>
+        <VerInfo_MinorVer>2</VerInfo_MinorVer>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_DcuOutput>.\__dcu\$(Platform)-$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\$(Platform)-$(Config)</DCC_ExeOutput>

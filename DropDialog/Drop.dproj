@@ -39,12 +39,6 @@
         <Cfg_1>true</Cfg_1>
         <Base>true</Base>
     </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win64)'!=''">
-        <Cfg_1_Win64>true</Cfg_1_Win64>
-        <CfgParent>Cfg_1</CfgParent>
-        <Cfg_1>true</Cfg_1>
-        <Base>true</Base>
-    </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
         <Cfg_2>true</Cfg_2>
         <CfgParent>Base</CfgParent>
@@ -54,11 +48,10 @@
         <DCC_PEOSVersion>6.0</DCC_PEOSVersion>
         <Icon_MainIcon>Drop.ico</Icon_MainIcon>
         <DCC_PESubSysVersion>6.0</DCC_PESubSysVersion>
-        <VerInfo_MinorVer>10</VerInfo_MinorVer>
-        <VerInfo_MajorVer>0</VerInfo_MajorVer>
+        <VerInfo_MinorVer>2</VerInfo_MinorVer>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Release>14</VerInfo_Release>
-        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Runs programs with restricted privileges;FileVersion=0.10.14.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=;OriginalFilename=Drop.exe;ProductName=Execution Master component: Drop admin rights;ProductVersion=0.10;Comments=</VerInfo_Keys>
+        <VerInfo_Release>24</VerInfo_Release>
+        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Runs programs with restricted privileges;FileVersion=1.2.24.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/;OriginalFilename=Drop.exe;ProductName=Execution Master component: Drop admin rights;ProductVersion=1.2;Comments=</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <SanitizedProjectName>Drop</SanitizedProjectName>
@@ -102,9 +95,6 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
-        <Debugger_RunParams>/IFEO C:\Portable\Cossacks 2\dmcr.exe help</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
