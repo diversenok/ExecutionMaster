@@ -1,5 +1,5 @@
 {   ExecutionMaster component.
-    Copyright (C) 2017 diversenok 
+    Copyright (C) 2017-2018 diversenok
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,13 +32,14 @@ var
 begin
   try
     // Actually, Image-File-Execution-Options always pass one or more parameters
+    ExitCode := ERROR_INVALID_PARAMETER;
     if ParamCount = 0 then
-      ExitProcess(ERROR_INVALID_PARAMETER);
+      Exit;
 
     if ParamStr(1) = KEY_DISPLAY then
     begin
       if ParamCount = 1 then
-        ExitProcess(ERROR_INVALID_PARAMETER);
+        Exit;
       StartFrom := 2;
       SetThreadExecutionState(ES_DISPLAY_REQUIRED or ES_CONTINUOUS);
     end
@@ -48,11 +49,13 @@ begin
       SetThreadExecutionState(ES_SYSTEM_REQUIRED or ES_CONTINUOUS);
     end;
 
-    if RunIgnoringIFEO(ParamsStartingFrom(StartFrom)) then
-      RunElevated(ParamsStartingFrom(StartFrom))
-    else
-      ExitProcess(STATUS_DLL_INIT_FAILED);
+    ExitCode := STATUS_DLL_INIT_FAILED;  // It will be overwritten on success
+    if RunIgnoringIFEOAndWait(ParamsStartingFrom(StartFrom)) =
+      pcsElevationRequired then
+      RunElevatedAndWait(ParamsStartingFrom(StartFrom));
+
+    SetThreadExecutionState(ES_CONTINUOUS);
   except
-    ExitProcess(STATUS_DLL_INIT_FAILED);
+    ExitCode := ERROR_UNHANDLED_EXCEPTION;
   end;
 end.

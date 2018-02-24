@@ -1,5 +1,5 @@
 {   ExecutionMaster component.
-    Copyright (C) 2017 diversenok
+    Copyright (C) 2017-2018 diversenok
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,57 +19,67 @@ unit ProcessUtils;
 
 interface
 
-uses Winapi.Windows;
+uses Winapi.Windows, Winapi.ShellAPI;
 
 const
-  // Let caller think process failed to start if user choose "No"
-  STATUS_DLL_INIT_FAILED = $C0000142;
+  // Let the caller think process failed to start if the user has chosen "No".
+  STATUS_DLL_INIT_FAILED = -1073741502; // $C0000142;
+
+  ERROR_UNHANDLED_EXCEPTION = $0000023E;
+
+type
+  TProcessCreationStatus = (pcsSuccess, pcsElevationRequired, pcsFailed);
 
 /// <summary>
-///  Checks if current process runs in zero session. </summary>
+///  Checks if the current process runs in zero session.
+/// </summary>
 /// <remarks>
 ///  Returns <c>False</c> if failed to obtain information.
 /// </remarks>
 function IsZeroSession: Boolean;
 
 /// <summary>
-///  Checks if current process runs with elevated token. </summary>
+///  Checks if the current process runs with en elevated token.
+/// </summary>
 /// <remarks>
 ///  Returns <c>False</c> if failed to obtain information.
 /// </remarks>
 function IsElevated: Boolean;
 
-/// <summary> Returns PID of parent process or zero on fail. </summary>
+/// <summary> Returns PID of the parent process or zero on failure. </summary>
 function GetParentPID(ProcessHandle: THandle): Cardinal;
 
 /// <summary>
-///  Returns PID of process that initiated our chain execution or zero on fail.
+///  Returns PID of the process that initiated execution chain or zero on failure.
 /// </summary>
 function InitiatorPID: Cardinal;
 
 /// <summary>
 ///  Uses <c>CreateProcess</c> with debugging flags to bypass
-///  Image-File-Execution-Options and waits for new process. </summary>
-/// <returns>
-///  <para> On <c>ERROR_ELEVATION_REQUIRED</c> returns <c>True</c> </para>
-///  <para> On other error returns <c>False</c> </para>
-///  <para> On success exits current process with the same exit code </para>
-/// </returns>
-function RunIgnoringIFEO(const Cmd: WideString; hToken: THandle = 0;
-  CurrentDir: WideString = ''): Boolean;
+///  Image-File-Execution-Options.
+/// </summary>
+function RunIgnoringIFEO(out PI: TProcessInformation;
+  const Cmd: WideString; hToken: THandle = 0;
+  CurrentDir: WideString = ''): TProcessCreationStatus;
 
 /// <summary>
-///  Runs application at highest privileges and waits for it. </summary>
-/// <returns>
-///  <para>
-///   On fail exits current process with <c>STATUS_DLL_INIT_FAILED</c> code
-///  </para>
-///  <para> On success exits with the same code </para>
-/// </returns>
-procedure RunElevated(const Cmd: WideString; const CurrentDir: WideString = '');
+///  Calls <c>RunIgnoringIFEO</c> and waits for the newly created process.
+/// </summary>
+function RunIgnoringIFEOAndWait(const Cmd: WideString;
+  hToken: THandle = 0; CurrentDir: WideString = ''): TProcessCreationStatus;
+
+/// <summary> Requests UAC to run the app at the highest privileges. </summary>
+function RunElevated(out EI: TShellExecuteInfoW; out ElevationMutex: THandle;
+  const Cmd: WideString; const CurrentDir: WideString = ''): TProcessCreationStatus;
 
 /// <summary>
-///  Checks if parent process is informing us that it has used
+///  Calls <c>RunElevated</c> and waits for the newly created process.
+/// </summary>
+function RunElevatedAndWait(const Cmd: WideString;
+  const CurrentDir: WideString = ''): TProcessCreationStatus;
+
+/// <summary>
+///  Checks if our parent process is informing us that it used
 ///  <c>ShellExecuteEx</c> because of lack of privileges.
 /// </summary>
 function ParentRequestedElevation: Boolean;
@@ -78,8 +88,6 @@ function ParentRequestedElevation: Boolean;
 function GetCurrentDir: string;
 
 implementation
-
-uses Winapi.ShellAPI;
 
 { -------- winternl.h -------- }
 
@@ -130,51 +138,52 @@ type
 
   /// <remarks>
   ///  Be sure to set <c>cb</c> member of <c>TStartupInfo</c> structure to
-  ///  <c>SizeOf(TStartupInfoEx)</c> and to enable
+  ///  <c>SizeOf(TStartupInfoExW)</c> and to enable
   ///  <c>EXTENDED_STARTUPINFO_PRESENT</c> flag for <c>CreateProcess</c>.
   /// </remarks>
-  TStartupInfoEx = record
-    StartupInfo: TStartupInfo;
+  TStartupInfoExW = record
+    StartupInfo: TStartupInfoW;
     lpAttributeList: PProcThreadAttributeEntry;
   end;
 
 /// <summary>
-///  Sets the action to be performed when the calling thread exits. </summary>
+///  Sets the action to be performed when the calling thread exits.
+/// </summary>
 /// <param name="KillOnExit"> If this parameter is TRUE, the thread terminates
 ///  all attached processes on exit (default behaviour). Otherwise,
 ///  the thread detaches from all processes being debugged on exit. </param>
 function DebugSetProcessKillOnExit(KillOnExit: BOOL): BOOL; stdcall;
   external kernel32 name 'DebugSetProcessKillOnExit';
 
-/// <summary>
-///  Stops the debugger from debugging the specified process. </summary>
+/// <summary> Stops us from debugging the specified process. </summary>
 /// <remarks>
-///  If you don't want to kill procrss use DebugSetProcessKillOnExit(False).
+///  If you don't want to kill the process use
+///  <c>DebugSetProcessKillOnExit(False)</c> before detaching debugger.
 /// </remarks>
 function DebugActiveProcessStop(dwProcessId: DWORD): BOOL; stdcall;
   external kernel32 name 'DebugActiveProcessStop';
 
 /// <summary> Extended version of <c>CreateProcessW</c>. </summary>
 /// <remarks>
-///  Always include <c>EXTENDED_STARTUPINFO_PRESENT</c> flag.
+///  Always include <c>EXTENDED_STARTUPINFO_PRESENT</c> flag!
 /// </remarks>
 function CreateProcessExW(lpApplicationName: LPCWSTR; lpCommandLine: LPWSTR;
   lpProcessAttributes: PSecurityAttributes;
   lpThreadAttributes: PSecurityAttributes; bInheritHandles: BOOL;
   dwCreationFlags: DWORD; lpEnvironment: Pointer; lpCurrentDirectory: LPCWSTR;
-  const lpStartupInfo: TStartupInfoEx;
+  const lpStartupInfo: TStartupInfoExW;
   var lpProcessInformation: TProcessInformation): BOOL; stdcall;
   external kernelbase name 'CreateProcessW';
 
-/// <summary> Extended version of CreateProcessAsUserW. </summary>
+/// <summary> Extended version of <c>CreateProcessAsUserW</c>. </summary>
 /// <remarks>
-///  Always include <c>EXTENDED_STARTUPINFO_PRESENT</c> flag.
+///  Always include <c>EXTENDED_STARTUPINFO_PRESENT</c> flag!
 /// </remarks>
 function CreateProcessAsUserExW(hToken: THandle; lpApplicationName: LPCWSTR;
   lpCommandLine: LPWSTR; lpProcessAttributes: PSecurityAttributes;
   lpThreadAttributes: PSecurityAttributes; bInheritHandles: BOOL;
   dwCreationFlags: DWORD; lpEnvironment: Pointer; lpCurrentDirectory: LPCWSTR;
-  const lpStartupInfo: TStartupInfoEx;
+  const lpStartupInfo: TStartupInfoExW;
   var lpProcessInformation: TProcessInformation): BOOL; stdcall;
   external advapi32 name 'CreateProcessAsUserW';
 
@@ -257,7 +266,7 @@ begin
 end;
 
 /// <summary>
-///  Allows you to run process without detaching debugger.
+///  Allows you to run the process without detaching debugger.
 /// </summary>
 /// <remarks>
 ///  Works correctly only with <c>DEBUG_ONLY_THIS_PROCESS</c> flag.
@@ -337,7 +346,7 @@ begin
 end;
 
 /// <summary>
-///  Returns the delimiter index between first existing file and other
+///  Returns the delimiter index between the first existing file and other
 ///  parameters.
 /// </summary>
 function DelimFirstFile(const S: String): Integer;
@@ -363,7 +372,7 @@ end;
 function ParentRequestedElevation: Boolean;
 var
   ElevationMutex: THandle;
-begin // Don't ask user again if our parent is another instance of Ask.exe
+begin // Don't ask the user again if our parent is another instance of Ask.exe
   ElevationMutex := OpenMutexA(MUTEX_MODIFY_STATE, False,
     PAnsiChar(MUTEX_NAME + IntToStr(GetParentPID(GetCurrentProcess))));
   Result := ElevationMutex <> 0;
@@ -391,28 +400,22 @@ begin
     Result := GetParentPID(GetCurrentProcess); // Just our parent
 end;
 
-function RunIgnoringIFEO;
+function SetNewParent(out hNewParent: THandle;
+  var SIEX: TStartupInfoExW): Boolean;
 var
-  { Actually, we should use TStartupInfoW. But it has the same size as
-    TStartupInfoA, so it will be ok. Simply, old Delphi doesn't have that type. }
-  SIEX: TStartupInfoEx;
-  PI: TProcessInformation;
-  ExitCode: Cardinal;
-  lpCommandLine: string;
-  hNewParent: THandle;
+  Buffer: SIZE_T;
+begin
+  Result := False;
+  Buffer := 0;
+  SIEX.lpAttributeList := nil;
 
-  function OpenNewParent: Boolean;
-  var
-    Buffer: SIZE_T;
-  begin
-    Result := False;
-    Buffer := 0;
-    hNewParent := OpenProcess(PROCESS_CREATE_PROCESS, False, InitiatorPID);
-    if hNewParent = 0 then
+  hNewParent := OpenProcess(PROCESS_CREATE_PROCESS, False, InitiatorPID);
+  if hNewParent = 0 then
+    Exit;
+  if not InitializeProcThreadAttributeList(nil, 1, 0, Buffer) then
+    if GetLastError <> ERROR_INSUFFICIENT_BUFFER then
       Exit;
-    if not InitializeProcThreadAttributeList(nil, 1, 0, Buffer) then
-      if GetLastError <> ERROR_INSUFFICIENT_BUFFER then
-        Exit;
+  try
     GetMem(SIEX.lpAttributeList, Buffer);
     if not InitializeProcThreadAttributeList(SIEX.lpAttributeList, 1, 0, Buffer)
     then
@@ -420,31 +423,34 @@ var
     if not UpdateProcThreadAttribute(SIEX.lpAttributeList, 0,
       PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, @hNewParent, SizeOf(hNewParent))
     then
+    begin
+      DeleteProcThreadAttributeList(SIEX.lpAttributeList);
       Exit;
+    end;
     Result := True;
+  finally
+    if not Result then // Clean up
+    begin
+      if SIEX.lpAttributeList <> nil then
+      begin
+        FreeMem(SIEX.lpAttributeList);
+        SIEX.lpAttributeList := nil;
+      end;
+      if hNewParent <> 0 then
+        CloseHandle(hNewParent);
+      // Note, that if we succeeded new parent's handle shouldn't be closed
+      // before calling DeleteProcThreadAttributeList.
+    end;
   end;
+end;
 
-  procedure AfterCreation;
-  begin
-    { Now we can:
-      - Run process under debugger by calling DebuggerRunAttached
-      - Detach it (not all programs like debuggers, right?). This is better.}
-    DebugSetProcessKillOnExit(False); // Should be called after CreateProcess
-    if not DebugActiveProcessStop(PI.dwProcessId) then
-      DebuggerRunAttached; // This really shouldn't happen, but who knows...
-    CloseHandle(hToken);
-    if hNewParent <> 0 then
-      CloseHandle(hNewParent);
-    if SIEX.lpAttributeList <> nil then
-      FreeMem(SIEX.lpAttributeList);
-    WaitForSingleObject(PI.hProcess, INFINITE);
-    GetExitCodeProcess(PI.hProcess, ExitCode);
-    CloseHandle(PI.hProcess);
-    CloseHandle(PI.hThread);
-    ExitProcess(ExitCode);
-  end;
+function RunIgnoringIFEO;
+var
+  SIEX: TStartupInfoExW;
+  hNewParent: THandle;
+  lpCommandLine: string;
 begin
-  Result := False;
+  Result := pcsFailed;
   lpCommandLine := Cmd;
   UniqueString(lpCommandLine); // CreateProcessW can modify lpCommandLine
   FillChar(PI, SizeOf(PI), 0);
@@ -452,53 +458,97 @@ begin
   SIEX.lpAttributeList := nil;
   if CurrentDir = '' then
     CurrentDir := GetCurrentDir;
-  if hToken = 0 then
-    if not OpenProcessToken(GetCurrentProcess, TOKEN_ALL_ACCESS_P, hToken) then
-      Exit(False); // Impossible?
-  { Creating process under debugger. This action wouldn't be intercepted by
+
+  { Creating process under the debugger. This action wouldn't be intercepted by
     Image-File-Execution-Options, so we wouldn't launch ourselves again. }
-  if OpenNewParent then // Will try to prepare SIEX.lpAttributeList
+  if SetNewParent(hNewParent, SIEX) then // Try to prepare SIEX.lpAttributeList
   begin
-    // Using TStartupInfoEx with EXTENDED_STARTUPINFO_PRESENT
-    SIEX.StartupInfo.cb := SizeOf(TStartupInfoEx);
-    if CreateProcessAsUserExW(hToken, nil, PWideChar(Cmd), nil, nil, True,
-      DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS or EXTENDED_STARTUPINFO_PRESENT,
-      nil, PWideChar(CurrentDir), SIEX, PI) then
-    begin
-      // Deleting attributes list before closing hNewParent handle
-      DeleteProcThreadAttributeList(SIEX.lpAttributeList);
-      AfterCreation; // Waiting and closing handles.
+    // Using TStartupInfoExW with EXTENDED_STARTUPINFO_PRESENT
+    SIEX.StartupInfo.cb := SizeOf(TStartupInfoExW);
+    
+    if hToken <> 0 then    
+    begin // An external token is provided
+      if CreateProcessAsUserExW(hToken, nil, PWideChar(Cmd), nil, nil, True,
+        DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS or EXTENDED_STARTUPINFO_PRESENT,
+        nil, PWideChar(CurrentDir), SIEX, PI) then
+        Result := pcsSuccess
+      else if GetLastError = ERROR_ELEVATION_REQUIRED then
+        Result := pcsElevationRequired;
     end
-    else if GetLastError = ERROR_ELEVATION_REQUIRED then
-      Result := True;
+    else
+    begin // No token
+      if CreateProcessExW(nil, PWideChar(Cmd), nil, nil, True,
+        DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS or EXTENDED_STARTUPINFO_PRESENT,
+        nil, PWideChar(CurrentDir), SIEX, PI) then
+        Result := pcsSuccess
+      else if GetLastError = ERROR_ELEVATION_REQUIRED then
+        Result := pcsElevationRequired;
+    end;
+
+    DeleteProcThreadAttributeList(SIEX.lpAttributeList);
+    CloseHandle(hNewParent); // Only after deleting ProcThreadAttributes
   end
   else
   begin
     // Using TStartupInfo
-    SIEX.StartupInfo.cb := SizeOf(TStartupInfo);
-    if CreateProcessAsUserW(hToken, nil, PWideChar(Cmd), nil, nil, True,
-      DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS, nil, PWideChar(CurrentDir),
-      SIEX.StartupInfo, PI) then
-      AfterCreation // Waiting and closing handles.
-    else if GetLastError = ERROR_ELEVATION_REQUIRED then
-      Result := True;
+    SIEX.StartupInfo.cb := SizeOf(TStartupInfo);    
+    if hToken <> 0 then
+    begin
+      if CreateProcessAsUserW(hToken, nil, PWideChar(Cmd), nil, nil, True,
+        DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS, nil, PWideChar(CurrentDir),
+        SIEX.StartupInfo, PI) then
+        Result := pcsSuccess
+      else if GetLastError = ERROR_ELEVATION_REQUIRED then
+        Result := pcsElevationRequired;
+    end
+    else
+    begin
+      if CreateProcessW(nil, PWideChar(Cmd), nil, nil, True,
+        DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS, nil, PWideChar(CurrentDir),
+        SIEX.StartupInfo, PI) then
+        Result := pcsSuccess
+      else if GetLastError = ERROR_ELEVATION_REQUIRED then
+        Result := pcsElevationRequired;
+    end;
+  end;
+  
+  if Result = pcsSuccess then
+  begin
+    DebugSetProcessKillOnExit(False); // Should be called after CreateProcess
+    if not DebugActiveProcessStop(PI.dwProcessId) then // Detaching
+      DebuggerRunAttached; // This really shouldn't happen, but who knows...
+  end;  
+end;
+
+function RunIgnoringIFEOAndWait;
+var
+  PI: TProcessInformation;
+  UExitCode: Cardinal;
+begin
+  Result := RunIgnoringIFEO(PI, Cmd, hToken, CurrentDir);
+  if Result = pcsSuccess then
+  begin
+    WaitForSingleObject(PI.hProcess, INFINITE);
+    GetExitCodeProcess(PI.hProcess, UExitCode);
+    // We can't pass ExitCode here due to incompatible types
+    ExitCode := UExitCode;
+    CloseHandle(PI.hProcess);
+    CloseHandle(PI.hThread);
   end;
 end;
 
-procedure RunElevated;
+function RunElevated;
 var
   App, Params: String;
   delim: Integer;
-  EI: TShellExecuteInfoW;
-  ExitCode: Cardinal;
-  ElevationMutex: THandle;
 begin
+  Result := pcsFailed;
   delim := DelimFirstFile(Cmd);
   App := Copy(Cmd, 1, delim - 1);
   Params := Copy(Cmd, delim + 1, Length(Cmd) - delim);
 
   { Preparing parameters for ShellExecuteEx. As soon as this procedure is used
-    in mono-thread application we don't need to call CoUninitialize. }
+    in a mono-thread application we don't need to call CoUninitialize. }
   FillChar(EI, SizeOf(EI), 0);
   with EI do
   begin
@@ -514,27 +564,36 @@ begin
     fMask := SEE_MASK_FLAG_DDEWAIT or SEE_MASK_UNICODE or
       SEE_MASK_NOCLOSEPROCESS; // We need process handle to wait for it
   end;
-  { ShellExecuteEx doesn't provide a possibility to bypass Image-File-
-    Execution-Options. So we rely on interception — it will show correct UAC,
-    but launch ourselves with high privileges instead. In case of Ask.exe we
-    need to force it accept "Yes" without asking. When process will exit — it's
-    exit code will be transmitted through chain of processes to the caller. }
+  { ShellExecuteEx doesn't provide a possibility to bypass Image File Execution
+    Options. So we rely on the interception — it will show the correct UAC, but
+    launch ourselves with high privileges instead. In case of Ask.exe, we need
+    to force it to accept "Yes" without asking. When process will exit — its
+    exit code will be transmitted through the chain of processes to the caller. }
   ElevationMutex := CreateMutexA(nil, False,
     PAnsiChar(MUTEX_NAME + IntToStr(GetCurrentProcessId)));
 
   if ShellExecuteExW(@EI) then
     if EI.hProcess <> 0 then
-    begin
-      { We are responsible now for EI.hProcess handle because of
-        SEE_MASK_NOCLOSEPROCESS flag }
-      WaitForSingleObject(EI.hProcess, INFINITE);
-      GetExitCodeProcess(EI.hProcess, ExitCode);
-      CloseHandle(EI.hProcess);
-      if ElevationMutex <> 0 then
-        CloseHandle(ElevationMutex);
-      ExitProcess(ExitCode);
-    end;
-  ExitProcess(STATUS_DLL_INIT_FAILED);
+      Result := pcsSuccess;
+end;
+
+function RunElevatedAndWait;
+var
+  EI: TShellExecuteInfoW;
+  UExitCode: Cardinal;
+  ElevationMutex: THandle;
+begin
+  Result := RunElevated(EI, ElevationMutex, Cmd, CurrentDir);
+  if Result = pcsSuccess then
+  begin
+    WaitForSingleObject(EI.hProcess, INFINITE);
+    GetExitCodeProcess(EI.hProcess, UExitCode);
+    // We can't pass ExitCode here due to incompatible types
+    ExitCode := UExitCode;
+    CloseHandle(EI.hProcess);
+    if ElevationMutex <> 0 then
+      CloseHandle(ElevationMutex);
+  end;
 end;
 
 end.

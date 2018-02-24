@@ -1,5 +1,5 @@
 {   ExecutionMaster component.
-    Copyright (C) 2017 diversenok 
+    Copyright (C) 2017-2018 diversenok
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,17 +32,18 @@ resourcestring
 
 procedure Run;
 begin
-  if RunIgnoringIFEO(ParamsStartingFrom(1)) then
-    RunElevated(ParamsStartingFrom(1))
-  else
-    ExitProcess(STATUS_DLL_INIT_FAILED);
+  if RunIgnoringIFEOAndWait(ParamsStartingFrom(1)) = pcsElevationRequired then
+    RunElevatedAndWait(ParamsStartingFrom(1));
 end;
 
 begin
   try
     // Actually, Image-File-Execution-Options always pass one or more parameters
+    ExitCode := ERROR_INVALID_PARAMETER;
     if ParamCount = 0 then
-      ExitProcess(ERROR_INVALID_PARAMETER);
+      Exit;
+
+    ExitCode := STATUS_DLL_INIT_FAILED; // Run overwrites it on success
 
     { User can't normally interact with Session 0 (except UI0Detect, but we
       can't rely on it, and it also doesn't cover \Winlogon Desktop), so we
@@ -50,11 +51,11 @@ begin
       instead. }
     if IsZeroSession or ParentRequestedElevation then
       Run
-    else if MessageBoxW(0, PWideChar(WideString(Text) + #$D#$A +
-      ParamsStartingFrom(1)), PWideChar(WideString(CAPTION)), FLAGS) = IDYES then
+    else if MessageBoxW(0, PWideChar(Text + #$D#$A + ParamsStartingFrom(1)),
+      PWideChar(CAPTION), FLAGS) = IDYES then
       Run;
   except
-    ExitProcess(STATUS_DLL_INIT_FAILED);
+    ExitCode := ERROR_UNHANDLED_EXCEPTION;
   end;
 end.
 

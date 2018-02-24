@@ -1,5 +1,5 @@
 {   ExecutionMaster component.
-    Copyright (C) 2017 diversenok 
+    Copyright (C) 2017-2018 diversenok
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,18 +39,21 @@ var
 begin
   try
     // Actually, Image-File-Execution-Options always pass one or more parameters
+    ExitCode := ERROR_INVALID_PARAMETER;
     if ParamCount = 0 then
-      ExitProcess(ERROR_INVALID_PARAMETER);
+      Exit;
 
     // making sure we were launched by IFEO
     IFEO_Enabled := ParamStr(1) = IFEO_KEY;
     if IFEO_Enabled and (ParamCount = 1) then
-      ExitProcess(ERROR_INVALID_PARAMETER);
+      Exit;
 
     if IFEO_Enabled then
       StartFrom := 2
     else
       StartFrom := 1;
+
+    ExitCode := STATUS_DLL_INIT_FAILED; // It will be overwritten on success
 
     // Trying to handle it without UAC
     SetEnvironmentVariable('__COMPAT_LAYER', 'RunAsInvoker');
@@ -58,21 +61,24 @@ begin
     // Creating restricted token
     if not SaferCreateLevel(SAFER_SCOPEID_USER, SAFER_LEVELID_NORMALUSER,
       SAFER_LEVEL_OPEN, hLevel, nil) then
-      ExitProcess(STATUS_DLL_INIT_FAILED);
+      Exit;
     if not SaferComputeTokenFromLevel(hLevel, 0, @hToken, 0, nil) then
-      ExitProcess(STATUS_DLL_INIT_FAILED);
+      Exit;
     SaferCloseLevel(hLevel);
 
-    if RunIgnoringIFEO(ParamsStartingFrom(StartFrom), hToken) then
+    if RunIgnoringIFEOAndWait(ParamsStartingFrom(StartFrom), hToken) =
+      pcsElevationRequired then
+    begin
       if IFEO_Enabled then
-        RunElevated(ParamsStartingFrom(StartFrom))
+        RunElevatedAndWait(ParamsStartingFrom(StartFrom))
       else // We can't rely on Image-File-Execution-Options
-        RunElevated('"' + ParamStr(0) + '" ' + ParamsStartingFrom(1))
-        { The only way to launch program with restricted but elevated token is to
-        start it from another instance of Drop.exe with higher privileges.}
-    else
-      ExitProcess(STATUS_DLL_INIT_FAILED);
+        RunElevatedAndWait('"' + ParamStr(0) + '" ' + ParamsStartingFrom(1))
+        { In this case the only way to launch the program with restricted but
+          elevated token is to start it from another instance of Drop.exe
+          with higher privileges.}
+    end;
+    CloseHandle(hToken);
   except
-    ExitProcess(STATUS_DLL_INIT_FAILED);
+    ExitCode := ERROR_UNHANDLED_EXCEPTION;
   end;
 end.

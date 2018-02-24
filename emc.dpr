@@ -36,7 +36,8 @@ resourcestring
 procedure Help;
 begin
   writeln(USAGE);
-  ExitProcess(ERROR_BAD_COMMAND);
+  ExitCode := ERROR_INVALID_PARAMETER;
+  Halt;
 end;
 
 procedure ActionQuery;

@@ -1,5 +1,5 @@
 {   ExecutionMaster component.
-    Copyright (C) 2017 diversenok 
+    Copyright (C) 2017-2018 diversenok
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,18 +32,23 @@ resourcestring
   TEXT = 'Program start denied:';
 
 begin
-  if ParamCount = 0 then
-    ExitProcess(ERROR_INVALID_PARAMETER);
+  try
+    ExitCode := ERROR_INVALID_PARAMETER;
+    if ParamCount = 0 then
+      Exit;
 
-  if ParamStr(1) = KEY_QUIET then
-    ExitProcess(STATUS_DLL_INIT_FAILED);
+    ExitCode := STATUS_DLL_INIT_FAILED;
+    if ParamStr(1) = KEY_QUIET then
+      Exit;
 
-  { User can't normally interact with Session 0 (except UI0Detect, but we
-    can't rely on it, and it also doesn't cover \Winlogon Desktop), so we
-    wouldn't show any messages in that case. }
-  if not IsZeroSession then
-    MessageBoxW(0, PWideChar(WideString(Text) + #$D#$A +
-      WideString(ParamsStartingFrom(1))), PWideChar(WideString(CAPTION)), FLAGS);
-   ExitProcess(STATUS_DLL_INIT_FAILED);
+    { User can't normally interact with Session 0 (except UI0Detect, but we
+      can't rely on it, and it also doesn't cover \Winlogon Desktop), so we
+      wouldn't show any messages in that case. }
+    if not IsZeroSession then
+      MessageBoxW(0, PWideChar(Text + #$D#$A + ParamsStartingFrom(1)),
+        PWideChar(CAPTION), FLAGS);
+  except
+    ExitCode := ERROR_UNHANDLED_EXCEPTION;;
+  end;
 end.
 
