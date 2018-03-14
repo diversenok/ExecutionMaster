@@ -52,8 +52,8 @@ const
   WARN_SYSPROC_CAPTION = 'System component';
 
   /// <summary> Some compatibility problems with specified processes. </summary>
-  CompatibilityProblems: array [0 .. 2] of String = ('chrome.exe',
-    'firefox.exe', 'browser.exe');
+  CompatibilityProblems: array [0 .. 3] of String = ('chrome.exe',
+    'firefox.exe', 'browser.exe', 'iexplore.exe');
 
   /// <summary> Warning for <c>CompatibilityProblems</c>. </summary>
   WARN_COMPAT = 'There are some compatibility problems with setting ' +
