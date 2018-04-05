@@ -91,11 +91,12 @@ begin
   for a := Low(TAction) to Pred(High(TAction)) do // not including aExecuteEx!
     if LowerCase(ParamStr(3)) = ActionShortNames[a] then
       Break;
-  if a = High(TAction) then // for cycle finished without breaking
+  if a = High(TAction) then // for-cycle finished without breaking
     raise Exception.Create('Unknown action.');
 
-  if not FileExists(Copy(ActionsExe[a], 2, Pos('"', ActionsExe[a], 2) - 2)) then
-  // Only file without params
+  if a in [Low(TFileBasedAction)..High(TFileBasedAction)] then
+    if not FileExists(Copy(EMDebuggers[a], 2,
+      Pos('"', EMDebuggers[a], 2) - 2)) then // Only file without params
     raise Exception.Create(ERR_ACTION);
 
   executable := ExtractFileName(ParamStr(2));

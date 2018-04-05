@@ -30,7 +30,7 @@ uses
   CmdUtils in 'Include\CmdUtils.pas',
   Registry2 in 'Include\Registry2.pas';
 
-resourcestring
+const
   USAGE = {$INCLUDE emcusage.txt};
 
 procedure Help;
@@ -95,7 +95,7 @@ begin
   Result := ParamsStartingFrom(4);
 end;
 
-procedure CheckForProblems(S: String);
+procedure CheckForProblems(Executable: String; Action: TAction);
 const
   WARN = ' [y/n]: ';
   ERR_CANCELED = 'Canceled by user.';
@@ -104,29 +104,31 @@ var
   i: integer;
 begin
   for i := Low(DangerousProcesses) to High(DangerousProcesses) do
-    if LowerCase(S) = DangerousProcesses[i] then
+    if LowerCase(Executable) = DangerousProcesses[i] then
     begin
-      write(Format(WARN_SYSPROC + WARN, [S]));
+      write(Format(WARN_SYSPROC + WARN, [Executable]));
       readln(Answer);
       if LowerCase(Answer) <> 'y' then
         raise Exception.Create(ERR_CANCELED);
       Break;
     end;
 
-  for i := Low(CompatibilityProblems) to High(CompatibilityProblems) do
-    if LowerCase(S) = CompatibilityProblems[i] then
-    begin
-      write(Format(WARN_COMPAT + WARN, [S]));
-      readln(Answer);
-      if LowerCase(Answer) <> 'y' then
-        raise Exception.Create(ERR_CANCELED);
-      Break;
-    end;
+  if Action in [aAsk..aDisplayOn, aExecuteEx] then
+    for i := Low(CompatibilityProblems) to High(CompatibilityProblems) do
+      if LowerCase(Executable) = CompatibilityProblems[i] then
+      begin
+        write(Format(WARN_COMPAT + WARN, [Executable]));
+        readln(Answer);
+        if LowerCase(Answer) <> 'y' then
+          raise Exception.Create(ERR_CANCELED);
+        Break;
+      end;
 end;
 
 procedure ActionSet;
 var
   a: TAction;
+  CodeToRaise: Integer;
   Dbg: TIFEORec;
   executable: string;
 begin
@@ -136,15 +138,25 @@ begin
   for a := Low(TAction) to High(TAction) do
     if LowerCase(ParamStr(3)) = ActionShortNames[a] then
       Break;
-  if a = Succ(High(TAction)) then // for cycle finished without breaking
+
+  if LowerCase(ParamStr(3)) = 'raise' then
+  begin
+    if ParamCount >= 4 then
+      a := ErrorCodeToAction(StrToInt(ParamStr(4)))
+    else
+      a := aDenyAccess;
+  end;
+
+  if a = Succ(High(TAction)) then // for-cycle finished without breaking
     raise Exception.Create('Unknown action.');
 
-  if not FileExists(Copy(ActionsExe[a], 2, Pos('"', ActionsExe[a], 2) - 2)) then
-    // Only file without params
-    raise Exception.Create(ERR_ACTION);
+  if a in [Low(TFileBasedAction)..High(TFileBasedAction)] then
+    if not FileExists(Copy(EMDebuggers[a], 2,
+      Pos('"', EMDebuggers[a], 2) - 2)) then // Only file without params
+      raise Exception.Create(ERR_ACTION);
 
   executable := ExtractFileName(ParamStr(2));
-  CheckForProblems(executable);
+  CheckForProblems(executable, a);
 
   if a = aExecuteEx then
     Dbg := TIFEORec.Create(a, executable, GetExec)
@@ -162,7 +174,7 @@ begin
 {$ELSE}
     write('x86');
 {$ENDIF}
-    writeln(' [console] v1.2 Copyright (C) 2017-2018 diversenok');
+    writeln(' [console] v1.4 Copyright (C) 2017-2018 diversenok');
     if IsElevated then
       writeln('Current process: elevated')
     else

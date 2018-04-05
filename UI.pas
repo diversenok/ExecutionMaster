@@ -26,7 +26,7 @@ uses
 type
   TExecListDialog = class(TForm)
     PanelRight: TPanel;
-    GroupBoxAction: TGroupBox;
+    GroupBoxActions: TGroupBox;
     ListViewExec: TListView;
     EditImage: TEdit;
     LabelImagePath: TLabel;
@@ -49,9 +49,20 @@ type
     MenuReg: TMenuItem;
     MenuUnreg: TMenuItem;
     N2: TMenuItem;
-    procedure ActionButtonsClick(Sender: TObject);
+    PanelTopRight: TPanel;
+    RadioButtonAsk: TRadioButton;
+    RadioButtonBlock: TRadioButton;
+    RadioButtonElevate: TRadioButton;
+    RadioButtonNoSleep: TRadioButton;
+    RadioButtonDisplayOn: TRadioButton;
+    RadioButtonDrop: TRadioButton;
+    RadioButtonError: TRadioButton;
+    ComboBoxErrorCodes: TComboBox;
+    RadioButtonExecute: TRadioButton;
     procedure ButtonBrowseClick(Sender: TObject);
     procedure ButtonBrowseExecClick(Sender: TObject);
+    procedure RadioButtonClick(Sender: TObject);
+    procedure ComboBoxErrorCodesClick(Sender: TObject);
     procedure Refresh(Sender: TObject);
     procedure ButtonAddClick(Sender: TObject);
     procedure ButtonDeleteClick(Sender: TObject);
@@ -64,8 +75,7 @@ type
     procedure MenuSourceClick(Sender: TObject);
   private
     Core: TImageFileExecutionOptions;
-    ActionButtons: array [TAction] of TRadioButton;
-    function GetTAction: TAction;
+    CurrentAction: TAction;
   end;
 
 var
@@ -80,19 +90,7 @@ const
 
   ERR_ONLYNAME = '"Executable name" should contain only file name, not a path.';
   ERR_ONLYNAME_CAPTION = 'Executable name';
-
   ERR_ACTION_CAPTION = 'Specified action not found';
-
-  ActionHints: array [TAction] of string =
-    ('Ask user permission to launch executable',
-     'Deny process to start and notify user',
-     'Deny process to start without notification',
-     'Drop administrative privileges of process',
-     'Elevates process to run as Administrator',
-     'Force computer not to sleep until process exits',
-     'Force display to be on until process exits',
-     'Execute another program instead');
-
   ERR_EMCSHELL = 'EMCShell component is missing.';
 
   INFO_REG = 'Shell extension was successfully registered.';
@@ -100,12 +98,6 @@ const
   INFO_REG_CAPTION = 'Success';
 
 {$R *.dfm}
-
-procedure TExecListDialog.ActionButtonsClick(Sender: TObject);
-begin
-  EditExec.Enabled := ActionButtons[aExecuteEx].Checked;
-  ButtonBrowseExec.Enabled := ActionButtons[aExecuteEx].Checked;
-end;
 
 procedure TExecListDialog.ButtonBrowseClick(Sender: TObject);
 begin
@@ -117,6 +109,25 @@ procedure TExecListDialog.ButtonBrowseExecClick(Sender: TObject);
 begin
   if OpenDlg.Execute then
     EditExec.Text := '"' + OpenDlg.FileName + '"';
+end;
+
+procedure TExecListDialog.RadioButtonClick(Sender: TObject);
+begin
+  if Sender is TRadioButton then
+    CurrentAction := TAction((Sender as TRadioButton).Tag);
+
+  if RadioButtonError.Checked then
+    CurrentAction := TAction(Integer(aDenySilently) +
+      ComboBoxErrorCodes.ItemIndex);
+
+  EditExec.Enabled := RadioButtonExecute.Checked;
+  ButtonBrowseExec.Enabled := RadioButtonExecute.Checked;
+end;
+
+procedure TExecListDialog.ComboBoxErrorCodesClick(Sender: TObject);
+begin
+  RadioButtonError.Checked := True;
+  RadioButtonClick(RadioButtonError);
 end;
 
 procedure TExecListDialog.Refresh(Sender: TObject);
@@ -139,19 +150,6 @@ begin
   ListViewExec.Items.EndUpdate;
 end;
 
-function TExecListDialog.GetTAction;
-var
-  a: TAction;
-begin
-  Result := aExecuteEx;
-  for a := Low(ActionButtons) to High(ActionButtons) do
-    if ActionButtons[a].Checked then
-    begin
-      Result := a;
-      Break;
-    end;
-end;
-
 procedure TExecListDialog.ListViewExecChange(Sender: TObject; Item: TListItem;
   Change: TItemChange);
 begin
@@ -162,9 +160,24 @@ begin
       with Core.Debuggers[ListViewExec.Selected.Index] do
       begin
         EditImage.Text := TreatedFile;
-        ActionButtons[Action].Checked := True;
-        if Action = aExecuteEx then
-          EditExec.Text := ExecStr;
+        case Action of
+          aAsk: RadioButtonAsk.Checked := True;
+          aDrop: RadioButtonDrop.Checked := True;
+          aElevate: RadioButtonElevate.Checked := True;
+          aNoSleep: RadioButtonNoSleep.Checked := True;
+          aDisplayOn: RadioButtonDisplayOn.Checked := True;
+          aDenyAndNotify: RadioButtonBlock.Checked := True;
+          aDenySilently..aDenyNotWin32:
+          begin
+            RadioButtonError.Checked := True;
+            ComboBoxErrorCodes.ItemIndex := Integer(Action) - Integer(aDenySilently);
+          end;
+          aExecuteEx:
+          begin
+            RadioButtonExecute.Checked := True;
+            EditExec.Text := DebuggerStr;
+          end;
+        end;
       end;
   end;
 end;
@@ -173,9 +186,9 @@ procedure TExecListDialog.ButtonAddClick(Sender: TObject);
 var
   i: integer;
 begin
-  if not ActionButtons[aExecuteEx].Checked then
-    if not FileExists(Copy(ActionsExe[GetTAction], 2,
-      Pos('"', ActionsExe[GetTAction], 2) - 2)) then // Only file without params
+  if CurrentAction in [Low(TFileBasedAction)..High(TFileBasedAction)] then
+    if not FileExists(Copy(EMDebuggers[CurrentAction], 2,
+      Pos('"', EMDebuggers[CurrentAction], 2) - 2)) then // Only file without params
       begin
         MessageBox(Handle, PChar(ERR_ACTION), PChar(ERR_ACTION_CAPTION),
          MB_OK or MB_ICONERROR);
@@ -196,13 +209,14 @@ begin
         PChar(WARN_SYSPROC_CAPTION), MB_YESNO or MB_ICONWARNING) <> IDYES then
         Exit;
 
-  for i := Low(CompatibilityProblems) to High(CompatibilityProblems) do
-    if LowerCase(EditImage.Text) = CompatibilityProblems[i] then
-      if MessageBox(Handle, PChar(Format(WARN_COMPAT, [EditImage.Text])),
-        PChar(WARN_COMPAT_CAPTION), MB_YESNO or MB_ICONWARNING) <> IDYES then
-        Exit;
+  if CurrentAction in [aAsk..aDisplayOn, aExecuteEx] then
+    for i := Low(CompatibilityProblems) to High(CompatibilityProblems) do
+      if LowerCase(EditImage.Text) = CompatibilityProblems[i] then
+        if MessageBox(Handle, PChar(Format(WARN_COMPAT, [EditImage.Text])),
+          PChar(WARN_COMPAT_CAPTION), MB_YESNO or MB_ICONWARNING) <> IDYES then
+          Exit;
 
-  Core.AddDebugger(TIFEORec.Create(GetTAction, EditImage.Text,
+  Core.AddDebugger(TIFEORec.Create(CurrentAction, EditImage.Text,
     EditExec.Text));
   Refresh(ButtonAdd);
   ListViewExecChange(Sender, ListViewExec.Selected, ctState);
@@ -223,27 +237,9 @@ end;
 procedure TExecListDialog.FormCreate(Sender: TObject);
 const
   BCM_SETSHIELD = $160C;
-var
-  a: TAction;
 begin
   ElvationHandle := Handle;
-  for a := Low(ActionButtons) to High(ActionButtons) do
-  begin
-    ActionButtons[a] := TRadioButton.Create(GroupBoxAction);
-    ActionButtons[a].Caption := ActionCaptionsGUI[a];
-    ActionButtons[a].Width := 220;
-    ActionButtons[a].Top := 20 + 21 * Integer(a);
-    ActionButtons[a].Left := 10;
-    ActionButtons[a].Parent := GroupBoxAction;
-    ActionButtons[a].OnClick := ActionButtonsClick;
-    ActionButtons[a].Hint := ActionHints[a];
-  end;
-  ActionButtons[Low(ActionButtons)].Checked := True;
-  EditExec.Top := 22 + 21 * Length(ActionButtons);
-  LabelNote.Top := 50 + 21 * Length(ActionButtons);
-  ButtonBrowseExec.Top := 50 + 21 * Length(ActionButtons);
-  GroupBoxAction.Height := 96 + 21 * Length(ActionButtons);
-  ClientHeight := GroupBoxAction.Top + GroupBoxAction.Height + 3;
+  Application.HintHidePause := 20000;
   Constraints.MinHeight := Height;
   MenuRunAsAdmin.Enabled := not ProcessIsElevated;
   if not ProcessIsElevated then
@@ -251,7 +247,6 @@ begin
     SendMessage(ButtonDelete.Handle, BCM_SETSHIELD, 0, 1);
     SendMessage(ButtonAdd.Handle, BCM_SETSHIELD, 0, 1);
   end;
-
   Refresh(Sender);
 end;
 

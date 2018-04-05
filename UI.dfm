@@ -2,8 +2,8 @@ object ExecListDialog: TExecListDialog
   Left = 353
   Top = 325
   Caption = 'Execution Master by diversenok'
-  ClientHeight = 264
-  ClientWidth = 648
+  ClientHeight = 350
+  ClientWidth = 649
   Color = clBtnFace
   Constraints.MinWidth = 510
   Font.Charset = DEFAULT_CHARSET
@@ -18,85 +18,216 @@ object ExecListDialog: TExecListDialog
   PixelsPerInch = 96
   TextHeight = 13
   object PanelRight: TPanel
-    Left = 404
+    Left = 405
     Top = 0
     Width = 244
-    Height = 264
+    Height = 350
     Align = alRight
     BevelOuter = bvNone
     TabOrder = 0
-    object LabelImagePath: TLabel
-      Left = 8
-      Top = 8
-      Width = 86
-      Height = 13
-      Caption = 'Executable name:'
-    end
-    object GroupBoxAction: TGroupBox
-      Left = 6
-      Top = 56
-      Width = 233
-      Height = 206
-      Caption = 'Action '
+    ExplicitLeft = 404
+    ExplicitHeight = 283
+    object PanelTopRight: TPanel
+      Left = 0
+      Top = 0
+      Width = 244
+      Height = 54
+      Align = alTop
+      BevelOuter = bvNone
       TabOrder = 0
-      object LabelNote: TLabel
+      ExplicitLeft = 6
+      ExplicitTop = -6
+      object LabelImagePath: TLabel
+        Left = 6
+        Top = 8
+        Width = 86
+        Height = 13
+        Caption = 'Executable name:'
+      end
+      object ButtonBrowse: TButton
+        Left = 174
+        Top = 23
+        Width = 66
+        Height = 25
+        Caption = 'Browse'
+        TabOrder = 0
+        OnClick = ButtonBrowseClick
+      end
+      object EditImage: TEdit
         Left = 8
-        Top = 160
+        Top = 27
+        Width = 161
+        Height = 21
+        TabOrder = 1
+      end
+    end
+    object GroupBoxActions: TGroupBox
+      Left = 5
+      Top = 54
+      Width = 235
+      Height = 293
+      Caption = 'Actions '
+      TabOrder = 1
+      object LabelNote: TLabel
+        Left = 6
+        Top = 258
         Width = 142
-        Height = 43
+        Height = 26
+        Hint = 'A.exe /param  -->  B.exe A.exe /param'
         AutoSize = False
-        Caption = 'Note: the last parameter will be original filename.'
+        Caption = 'Note: the last parameter will be the original filename.'
         WordWrap = True
       end
-      object EditExec: TEdit
-        Left = 8
-        Top = 132
-        Width = 217
-        Height = 21
-        Enabled = False
+      object RadioButtonDrop: TRadioButton
+        Tag = 1
+        Left = 7
+        Top = 42
+        Width = 220
+        Height = 17
+        Hint = 
+          'Drop administrative privileges of the process. Even if the token' +
+          ' is still elevated adminstrators group membership is used for de' +
+          'ny only.'
+        Caption = 'Dro&p admin rights'
         TabOrder = 0
+        OnClick = RadioButtonClick
+      end
+      object RadioButtonDisplayOn: TRadioButton
+        Tag = 4
+        Left = 7
+        Top = 108
+        Width = 220
+        Height = 17
+        Hint = 'Force the display to be on until the process exits'
+        Caption = 'Force d&isplay on'
+        TabOrder = 1
+        OnClick = RadioButtonClick
+      end
+      object RadioButtonElevate: TRadioButton
+        Tag = 2
+        Left = 7
+        Top = 65
+        Width = 220
+        Height = 17
+        Hint = 'Elevates the process to run as Administrator'
+        Caption = '&Elevate'
+        TabOrder = 2
+        OnClick = RadioButtonClick
+      end
+      object RadioButtonNoSleep: TRadioButton
+        Tag = 3
+        Left = 7
+        Top = 86
+        Width = 220
+        Height = 17
+        Hint = 'Force the computer not to sleep until the process exits'
+        Caption = 'No sleep &until exit'
+        TabOrder = 3
+        OnClick = RadioButtonClick
+      end
+      object RadioButtonBlock: TRadioButton
+        Tag = 5
+        Left = 7
+        Top = 130
+        Width = 220
+        Height = 17
+        Hint = 'Block the process start and show a notification to the user'
+        Caption = '&Deny and notify user'
+        TabOrder = 4
+        OnClick = RadioButtonClick
+      end
+      object RadioButtonAsk: TRadioButton
+        Left = 7
+        Top = 20
+        Width = 220
+        Height = 17
+        Hint = 'Ask user befor starting the program'
+        Caption = '&Ask permission to start'
+        Checked = True
+        TabOrder = 5
+        TabStop = True
+        OnClick = RadioButtonClick
+      end
+      object RadioButtonExecute: TRadioButton
+        Tag = 13
+        Left = 7
+        Top = 205
+        Width = 220
+        Height = 17
+        Hint = 
+          'The system will run the executable below instead of running the ' +
+          'executable above'
+        Caption = 'E&xecute another program instead:'
+        TabOrder = 6
+        OnClick = RadioButtonClick
       end
       object ButtonBrowseExec: TButton
-        Left = 153
-        Top = 160
+        Left = 155
+        Top = 263
         Width = 72
         Height = 25
         Caption = 'Browse'
         Enabled = False
-        TabOrder = 1
+        TabOrder = 7
         OnClick = ButtonBrowseExecClick
       end
-    end
-    object ButtonBrowse: TButton
-      Left = 175
-      Top = 25
-      Width = 66
-      Height = 25
-      Caption = 'Browse'
-      TabOrder = 1
-      OnClick = ButtonBrowseClick
-    end
-    object EditImage: TEdit
-      Left = 8
-      Top = 27
-      Width = 161
-      Height = 21
-      TabOrder = 2
+      object ComboBoxErrorCodes: TComboBox
+        Left = 6
+        Top = 176
+        Width = 221
+        Height = 21
+        Style = csDropDownList
+        ItemIndex = 2
+        TabOrder = 8
+        Text = '5 Access is denied'
+        OnClick = ComboBoxErrorCodesClick
+        Items.Strings = (
+          '0 Success [not recommended]'
+          '2 Cannot find the file specified'
+          '5 Access is denied'
+          '32 The file is being used by another process'
+          '87 Cannot execute the specified program'
+          '129 The file cannot be run in Win32 mode'
+          '193 Not a valid Win32 application')
+      end
+      object RadioButtonError: TRadioButton
+        Tag = 6
+        Left = 7
+        Top = 152
+        Width = 220
+        Height = 17
+        Hint = 
+          'Block the process from being started and return this error code ' +
+          'to the caller'
+        Caption = 'Deny and return e&rror code:'
+        TabOrder = 9
+        OnClick = RadioButtonClick
+      end
+      object EditExec: TEdit
+        Left = 6
+        Top = 230
+        Width = 221
+        Height = 21
+        Enabled = False
+        TabOrder = 10
+      end
     end
   end
   object PanelLeft: TPanel
     Left = 0
     Top = 0
-    Width = 404
-    Height = 264
+    Width = 405
+    Height = 350
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitWidth = 404
+    ExplicitHeight = 283
     object ListViewExec: TListView
       Left = 0
       Top = 0
-      Width = 404
-      Height = 231
+      Width = 405
+      Height = 317
       Align = alClient
       Columns = <
         item
@@ -114,15 +245,20 @@ object ExecListDialog: TExecListDialog
       TabOrder = 0
       ViewStyle = vsReport
       OnChange = ListViewExecChange
+      ExplicitLeft = 2
+      ExplicitTop = -2
+      ExplicitHeight = 326
     end
     object PanelBottom: TPanel
       Left = 0
-      Top = 231
-      Width = 404
+      Top = 317
+      Width = 405
       Height = 33
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
+      ExplicitTop = 250
+      ExplicitWidth = 404
       object ButtonRefresh: TBitBtn
         Left = 8
         Top = 4
@@ -186,13 +322,14 @@ object ExecListDialog: TExecListDialog
         OnClick = ButtonDeleteClick
       end
       object PanelAdd: TPanel
-        Left = 324
+        Left = 325
         Top = 0
         Width = 80
         Height = 33
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 2
+        ExplicitLeft = 324
         object ButtonAdd: TButton
           Left = 2
           Top = 4
@@ -208,12 +345,12 @@ object ExecListDialog: TExecListDialog
   object OpenDlg: TOpenDialog
     Filter = 'Executables (*.exe; *.com)|*.exe; *.com'
     Options = [ofReadOnly, ofEnableSizing]
-    Left = 593
-    Top = 80
+    Left = 241
+    Top = 168
   end
   object MainMenu: TMainMenu
-    Left = 554
-    Top = 80
+    Left = 194
+    Top = 168
     object MenuFile: TMenuItem
       Caption = 'Menu'
       object MenuRunAsAdmin: TMenuItem

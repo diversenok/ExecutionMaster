@@ -38,6 +38,12 @@ begin
 end;
 
 procedure RegShellMenu(ShellExe: string);
+const
+  ActionCaptionsGUI: array [TAction] of string = ('&Ask user''s permission',
+    'Dro&p admin rights', '&Elevate', 'No sleep &until exit',
+    'Force d&isplay on', '&Deny and notify user', '', '',
+    'Raise a&ccess denied', '', '', '', '', ''
+    );
 var
   a: TAction;
 begin
@@ -57,10 +63,13 @@ begin
         OpenKey('command', True);
         WriteString('', '"' + ShellExe + '" reset "%1"');
         CloseKey;
-        for a := Low(TAction) to Pred(High(TAction)) do
+        for a in [aAsk..aDenyAndNotify, aDenyAccess] do
         begin
           OpenKey(Format(K1, [Integer(a) + 1]), True);
-          WriteString('Icon', GetIcon(ActionsExe[a]));
+          if a = aDenyAccess then
+            WriteString('Icon', GetIcon(EMDebuggers[aDenyAndNotify]))
+          else
+            WriteString('Icon', GetIcon(EMDebuggers[a]));
           WriteString('MUIVerb', ActionCaptionsGUI[a]);
           OpenKey('command', True);
           WriteString('', '"' + ShellExe + '" set "%1" ' + ActionShortNames[a]);

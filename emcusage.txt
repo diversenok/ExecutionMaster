@@ -6,58 +6,124 @@
 'any program launch using several standard actions:'#$D#$A +
 ''#$D#$A +
 ' - Ask user to confirm program execution;'#$D#$A +
-' - Deny program execution (2 modes: notify user and not);'#$D#$A +
+' - Deny program execution;'#$D#$A +
 ' - Drop administrative privileges of specified program;'#$D#$A +
 ' - Request elevation for the program at every launch;'#$D#$A +
 ' - Force system not to sleep / display to be on while selected program works;'#$D#$A +
 ' - Execute another program instead of specified.'#$D#$A +
 ''#$D#$A +
-'Source code: https://github.com/diversenok/ExecutionMaster'#$D#$A +
 ''#$D#$A +
 'Usage: emc.exe [query|set|reset] [[parameters]]'#$D#$A +
 ''#$D#$A +
 ' query: Lists all programs with specified actions according to the mask.'#$D#$A +
-' ====='#$D#$A +
+' ===== '#$D#$A +
 '  Usage: emc.exe query [[mask]]'#$D#$A +
+'  '#$D#$A +
 '  Optional parameter:'#$D#$A +
 '   mask => ? matches one symbol and * matches any count of symbols'#$D#$A +
+'   '#$D#$A +
 '  Examples:'#$D#$A +
 '   > emc query *'#$D#$A +
 '    Will list all settings.'#$D#$A +
 '   > emc query f*.exe'#$D#$A +
 '    Will list "file.exe" but not "executable.exe".'#$D#$A +
+' '#$D#$A +
 ''#$D#$A +
-' set: Registers specified action for specified file.'#$D#$A +
+' set: Registers the specified action for the specified file.'#$D#$A +
 ' ==='#$D#$A +
 '  Usage: emc.exe set [file] [action] [[another_file and it''s parameters]]'#$D#$A +
-'  Note:'#$D#$A +
-'   This will overwrite existing setting for specified file.'#$D#$A +
+'  '#$D#$A +
+'  Note: This will overwrite existing setting for specified file.'#$D#$A +
+'   '#$D#$A +
 '  Parameters:'#$D#$A +
-'   file => Filename with/without a path to be intercepted. (Path is ignored'#$D#$A +
-'     in current version). If the filename contains spaces put it in qoutes.'#$D#$A +
-'   action => [ask|deny|deny-silent|drop|elevate|nosleep|display-on|execute]'#$D#$A +
-'   another_file => Full name of an another executable file with path'#$D#$A +
-'     (recommended to quote it) and parameters separated by spaces. Use'#$D#$A +
-'     it only with "execute" action. It will always execute "another_file"'#$D#$A +
-'     instead of "file". No need to escape quotes, this part of command line'#$D#$A +
-'     will be passed without any changes.'#$D#$A +
+'  '#$D#$A +
+' | file => Filename with/without a path to be intercepted. (Path is ignored'#$D#$A +
+' |   in current version). If the filename contains spaces put it in qoutes.'#$D#$A +
+' |   '#$D#$A +
+' | action => [ask|drop|elevate|nosleep|display-on|deny|deny-success|'#$D#$A +
+' |   deny-not-found|deny-access|deny-shared|deny-execution|deny-not-win32|'#$D#$A +
+' |   deny-not-valid|execute] or [raise [[code]]]  '#$D#$A +
+' |   '#$D#$A +
+' |   ask: Always ask user''s permission before starting the program.'#$D#$A +
+' |   '#$D#$A +
+' |   drop: Drop administrative privileges of the process. Even if the token'#$D#$A +
+' |    is still elevated administrators group membership is used for deny only.'#$D#$A +
+' |    '#$D#$A +
+' |   elevate: Elevates the process to run as Administrator.'#$D#$A +
+' |   '#$D#$A +
+' |   nosleep: Force the computer not to sleep until the process exits.'#$D#$A +
+' |   '#$D#$A +
+' |   display-on: Force the display to be on until the process exits.'#$D#$A +
+' |   '#$D#$A +
+' |   deny: Block the process start and show a notification to the user.'#$D#$A +
+' |   '#$D#$A +
+' |   deny-success: Block the process start and return error code 0 (Success).'#$D#$A +
+' |    This action is not recommended since it consumes more resources then '#$D#$A +
+' |    other raising actions described below.'#$D#$A +
+' |    '#$D#$A +
+' |   deny-not-found: Block the process creation and return error code 2 to'#$D#$A +
+' |    the caller. (2 = The system cannot find the file specified.)'#$D#$A +
+' |    '#$D#$A +
+' |   deny-access: Block the process creation and return error code 5 to'#$D#$A +
+' |    the caller. (5 = Access is denied.)'#$D#$A +
+' |   '#$D#$A +
+' |   deny-shared: Block the process creation and return error code 32 to'#$D#$A +
+' |    the caller. (32 = The process cannot access the file because it is'#$D#$A +
+' |    being used by another process.)      '#$D#$A +
+' |   '#$D#$A +
+' |   deny-execution: Block the process creation and return error code 87 to'#$D#$A +
+' |    the caller. (87 = The parameter is incorrect. / The system cannot'#$D#$A +
+' |    execute the specified program.)'#$D#$A +
+' |   '#$D#$A +
+' |   deny-not-win32: Block the process creation and return error code 129 to'#$D#$A +
+' |    the caller. (129 = The application cannot be run in Win32 mode.)'#$D#$A +
+' |        '#$D#$A +
+' |   deny-not-valid:  Block the process creation and return error code 193 to'#$D#$A +
+' |    the caller. (193 = The file is not a valid Win32 application.)'#$D#$A +
+' |    '#$D#$A +
+' |   raise:     An alias to "raise 5"'#$D#$A +
+' |   raise 0:   An alias to "deny-success"'#$D#$A +
+' |   raise 2:   An alias to "deny-not-found"'#$D#$A +
+' |   raise 5:   An alias to "deny-access"'#$D#$A +
+' |   raise 32:  An alias to "deny-shared"'#$D#$A +
+' |   raise 87:  An alias to "deny-execution"'#$D#$A +
+' |   raise 129: An alias to "deny-not-win32"'#$D#$A +
+' |   raise 193: An alias to "deny-not-valid"'#$D#$A +
+' |   '#$D#$A +
+' | + execute: Execute another file instead. In this case you should'#$D#$A +
+' | |  specify the "another_file" parameter. Note, that the original command'#$D#$A +
+' | |  line which consist of the original filename and it''s parameters will'#$D#$A +
+' | |  be passed as a parameter to the new executable.'#$D#$A +
+' | | '#$D#$A +
+' | |  another_file => Full name of an another executable file with path'#$D#$A +
+' | |   (recommended to quote it) and parameters separated by spaces. Use'#$D#$A +
+' | |   it only with "execute" action. No need to escape quotes, this part'#$D#$A +
+' | |   of command line will be passed without any changes.'#$D#$A +
+' + +'#$D#$A +
+' '#$D#$A +
 '  Examples:'#$D#$A +
 '   > emc set taskmgr.exe elevate'#$D#$A +
 '    Now all executions of taskmgr.exe will request elevation.'#$D#$A +
-'   > emc set "Launch me.exe" deny'#$D#$A +
+'   > emc set "Launch me.exe" deny-notify'#$D#$A +
 '    Now noone can run this suspicious file.'#$D#$A +
 '   > emc set BSA.exe drop'#$D#$A +
 '    Now BSA.exe will run only with restricted privileges even after UAC.'#$D#$A +
 '   > emc set notepad.exe execute "C:\Program Files\AkelPad\AkelPad.exe" /z'#$D#$A +
 '    Now text files will be opened in AkelPad with /z key instead of Notepad.'#$D#$A +
 ''#$D#$A +
-' reset: Unregisters action for specified programs that matches mask.'#$D#$A +
+''#$D#$A +
+' reset: Unregisters action for the specified programs that match the mask.'#$D#$A +
 ' ====='#$D#$A +
 '  Usage: emc.exe reset [[mask]]'#$D#$A +
+'  '#$D#$A +
 '  Optional parameter:'#$D#$A +
 '   mask => ? matches one symbol and * matches any count of symbols  '#$D#$A +
+'   '#$D#$A +
 '  Examples:'#$D#$A +
 '   > emc reset *'#$D#$A +
 '    Will clear all saved actions for all files.'#$D#$A +
 '   > emc reset notepad.exe'#$D#$A +
-'    Will clear action only for notepad.exe.'
+'    Will clear action only for notepad.exe.'#$D#$A +
+''#$D#$A +
+''#$D#$A +
+'For more information and the source code visit:'#$D#$A + 'https://github.com/diversenok/ExecutionMaster'

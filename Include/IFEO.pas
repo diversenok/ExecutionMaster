@@ -21,23 +21,27 @@ interface
 uses Winapi.Windows;
 
 type
-  TAction = (aAsk, aDeny, aDenySilent, aDrop, aElevate, aNoSleep, aDisplayOn,
-    aExecuteEx);
+  TAction = (aAsk, aDrop, aElevate, aNoSleep, aDisplayOn,
+    aDenyAndNotify, // Launch Deny.exe
+    aDenySilently,  // Raise code 0 by launching Deny.exe in silent mode
+    aDenyNotFound,  // Raise code 2
+    aDenyAccess,    // Raise code 5
+    aDenyShared,    // Raise code 32
+    aDenyExecute,   // Raise code 87
+    aDenyNotWin32,  // Raise code 129
+    aDenyNotValid,  // Raise code 193
+    aExecuteEx      // A.exe /param  |-->  B.exe A.exe /param
+  );
   // Note: aExecuteEx should be the last action
 
+  TFileBasedAction = aAsk..aDenySilently;
+
 const
-  // In common case use TIFEORec.GetCaption
-  ActionCaptions: array [TAction] of string = ('Ask', 'Deny',
-    'Deny (silent mode)', 'Drop admin rights', 'Elevate', 'No sleep until exit',
-    'Force display on', 'Execute: ');
-
-  ActionCaptionsGUI: array [TAction] of string = ('&Ask', '&Deny',
-    'Deny (&silent mode)', 'Dro&p admin rights', '&Elevate',
-    'No sleep &until exit', 'Force d&isplay on', 'E&xecute: ');
-
   // Command-line short names
-  ActionShortNames: array [TAction] of string = ('ask', 'deny', 'deny-silent',
-    'drop', 'elevate', 'nosleep', 'display-on', 'execute');
+  ActionShortNames: array [TAction] of string = ('ask', 'drop', 'elevate',
+    'nosleep', 'display-on', 'deny', 'deny-success', 'deny-not-found',
+    'deny-access', 'deny-shared', 'deny-execution', 'deny-not-win32',
+    'deny-not-valid', 'execute');
 
   /// <summary> You shouldn't mess with them. </summary>
   DangerousProcesses: array [0 .. 18] of string = ('csrss.exe', 'dwm.exe',
@@ -62,7 +66,7 @@ const
   WARN_COMPAT_CAPTION = 'Compatibility problems';
 
 var
-  ActionsExe: array [TAction] of string;
+  EMDebuggers: array [TAction] of string;
 
 const
   ERR_ACTION = 'Can''t find executable file that performs specified action.' +
@@ -76,15 +80,15 @@ type
   TIFEORec = record
     Action: TAction;
     TreatedFile: string;
-    ExecStr: string;
+    DebuggerStr: string;
     constructor Create(AAction: TAction; const ATreatedFile: string;
-      const AExecStr: string = ''); overload;
-    constructor Create(const ATreatedFile, AExecStr: string); overload;
+      const ADebugger: string = ''); overload;
+    constructor Create(const ATreatedFile, ADebugger: string); overload;
     function GetCaption: string;
   end;
 
   /// <summary>
-  ///  Main class to querying/setting information related to IFEO.
+  ///  Main class for querying/setting information related to IFEO.
   /// </summary>
   TImageFileExecutionOptions = class
   protected
@@ -94,7 +98,7 @@ type
     Arr: TExecConfigArray;
     class function GetKey(const ATreatedFile: string): string;
     /// <summary>
-    ///  Escapes all quotes and last backslash for use with reg.exe
+    ///  Escapes all quotes and the last backslash for use with reg.exe
     /// </summary>
     class function EscapeStr(const Str: string): string;
     /// <summary>
@@ -129,6 +133,12 @@ type
     property Debuggers[ind: integer]: TIFEORec read GetDebugger; default;
   end;
 
+
+  /// <summary>
+  ///  Converts an error code that you want to raise with IFEO into a
+  ///  well-known action.
+  /// </summary>
+function ErrorCodeToAction(CodeToRaise: Integer): TAction;
 procedure ElevetedExecute(const AWnd: HWND; const AFileName: WideString;
   const AParameters: WideString = ''; WaitProcess: Boolean = False;
   const npShow: integer = SW_HIDE);
@@ -145,18 +155,21 @@ implementation
 
 uses System.SysUtils, Winapi.ShellApi, ProcessUtils, Registry2;
 
-resourcestring
-  ActionRel0 = '"%sActions\Ask.exe"';
-  ActionRel1 = '"%sActions\Deny.exe"';
-  ActionRel2 = '"%sActions\Deny.exe" /quiet';
-  ActionRel3 = '"%sActions\Drop.exe" /IFEO';
-  ActionRel4 = '"%sActions\Elevate.exe"';
-  ActionRel5 = '"%sActions\PowerRequest.exe"';
-  ActionRel6 = '"%sActions\PowerRequest.exe" /display';
-
-const
-  ActionsRelExe: array [TAction] of string = (ActionRel0, ActionRel1,
-    ActionRel2, ActionRel3, ActionRel4, ActionRel5, ActionRel6, '');
+function ErrorCodeToAction(CodeToRaise: Integer): TAction;
+begin
+  case CodeToRaise of
+    0: Result := aDenySilently;
+    2: Result := aDenyNotFound;
+    5: Result := aDenyAccess;
+    32: Result := aDenyShared;
+    87: Result := aDenyExecute;
+    129: Result := aDenyNotWin32;
+    193: Result := aDenyNotValid;
+  else
+    raise Exception.Create('The specified error code has no associated ' +
+      'action. It can''t be raised');
+  end;
+end;
 
   { ShellApi }
 
@@ -200,38 +213,49 @@ end;
   { TImageFileOptionsRec }
 
 constructor TIFEORec.Create(AAction: TAction; const ATreatedFile: string;
-  const AExecStr: string = '');
+  const ADebugger: string = '');
 begin
   Action := AAction;
   TreatedFile := ATreatedFile;
   if AAction = aExecuteEx then
-    ExecStr := AExecStr
+    DebuggerStr := ADebugger
   else
-    ExecStr := ActionsExe[AAction];
+    DebuggerStr := EMDebuggers[AAction];
 end;
 
-constructor TIFEORec.Create(const ATreatedFile, AExecStr: string);
+constructor TIFEORec.Create(const ATreatedFile, ADebugger: string);
 var
   a: TAction;
 begin
   TreatedFile := ATreatedFile;
-  ExecStr := AExecStr;
+  DebuggerStr := ADebugger;
   Action := aExecuteEx;
-  for a := Low(ActionsExe) to Pred(High(ActionsExe)) do
-    if AExecStr = ActionsExe[a] then
+  for a := Low(EMDebuggers) to Pred(High(EMDebuggers)) do
+    if ADebugger = EMDebuggers[a] then
     begin
       Action := a;
-      ExecStr := ActionsExe[a]; // reference to existing string, not a copy
+      DebuggerStr := EMDebuggers[a]; // a reference to existing string, not a copy
       Break;
     end;
 end;
 
 function TIFEORec.GetCaption: string;
+const
+  ActionCaptions: array [TAction] of string = ('Ask', 'Drop admin rights',
+    'Elevate', 'No sleep until exit', 'Force display on', 'Deny and notify user',
+    'Raise error 0',
+    'Raise error 2',
+    'Raise access denied',
+    'Raise error 32',
+    'Raise error 87',
+    'Raise error 129',
+    'Raise error 193',
+    'Execute: '
+    );
 begin
+  Result := ActionCaptions[Action];
   if Action = aExecuteEx then
-    Result := ActionCaptions[aExecuteEx] + ExecStr
-  else
-    Result := ActionCaptions[Action];
+    Result := Result + DebuggerStr;
 end;
 
 { Registry constants }
@@ -299,13 +323,13 @@ begin
     try
       if not reg.OpenKey(GetKey(Debugger.TreatedFile), True) then
         raise Exception.Create('Unable to open registry key while registering');
-      reg.WriteString(REG_VALUE, Debugger.ExecStr); // can raise excetion itself
+      reg.WriteString(REG_VALUE, Debugger.DebuggerStr); // can raise excetion itself
     finally
       reg.Free;
     end
   end
   else ElevetedExecute(ElvationHandle, REG_EXE, Format(PARAMS,
-    [GetKey(Debugger.TreatedFile), EscapeStr(Debugger.ExecStr)]));
+    [GetKey(Debugger.TreatedFile), EscapeStr(Debugger.DebuggerStr)]));
 end;
 
 class procedure TImageFileExecutionOptions.UnregisterDebugger;
@@ -412,16 +436,34 @@ begin
 end;
 
 procedure DoInitialization;
+const
+  FileBasedActions: array [TFileBasedAction] of string = (
+    '"%sActions\Ask.exe"',
+    '"%sActions\Drop.exe" /IFEO',
+    '"%sActions\Elevate.exe"',
+    '"%sActions\PowerRequest.exe"',
+    '"%sActions\PowerRequest.exe" /display',
+    '"%sActions\Deny.exe"',
+    '"%sActions\Deny.exe" /quiet');
 var
   a: TAction;
+  ActionsFolder, SysDrive: string;
 begin
   ProcessIsElevated := ProcessUtils.IsElevated;
+  SysDrive := '"' + GetEnvironmentVariable('SystemDrive');
   // TODO -cInstaller: Moving actions to Common Files
-  // CommonFiles := GetEnvironmentVariable('CommonProgramFiles') + '\';
-  for a := Low(ActionsExe) to Pred(High(ActionsExe)) do
-    ActionsExe[a] := Format(ActionsRelExe[a], [ExtractFilePath(ParamStr(0))]);
-  { ExtractFileDir behave different at drive root and other folders.
-    So ExtractFilePath is better}
+  ActionsFolder := ExtractFilePath(ParamStr(0));
+  //ActionsFolder := GetEnvironmentVariable('CommonProgramFiles') + '\';
+
+  for a := Low(FileBasedActions) to High(FileBasedActions) do
+    EMDebuggers[a] := Format(FileBasedActions[a], [ActionsFolder]);
+
+  EMDebuggers[aDenyNotFound] := '*';
+  EMDebuggers[aDenyAccess] := '.';
+  EMDebuggers[aDenyShared] := SysDrive + '\pagefile.sys"';
+  EMDebuggers[aDenyExecute] := '""';
+  EMDebuggers[aDenyNotWin32] := SysDrive + '\Windows\System32\ntoskrnl.exe"';
+  EMDebuggers[aDenyNotValid] := SysDrive + '\Windows\System32\ntdll.dll"';
 end;
 
 initialization
