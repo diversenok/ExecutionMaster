@@ -28,8 +28,8 @@ const
   KEY_QUIET = '/quiet'; // Parameter: do not show dialog
 
 resourcestring
-  CAPTION = 'Launch rejected';
-  TEXT = 'Program start denied:';
+  CAPTION = 'The program is blocked';
+  TEXT = 'The program start was blocked:';
 
 begin
   try

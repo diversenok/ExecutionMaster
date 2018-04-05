@@ -27,8 +27,8 @@ const
   FLAGS = MB_YESNO or MB_TOPMOST or MB_ICONWARNING; // MessageBox design
 
 resourcestring
-  CAPTION = 'Launch confirmation';
-  TEXT = 'Confirm program to start:';
+  CAPTION = 'User''s approvement is required';
+  TEXT = 'Confirm the program to start:';
 
 procedure Run;
 begin
