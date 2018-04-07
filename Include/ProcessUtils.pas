@@ -30,6 +30,14 @@ const
 type
   TProcessCreationStatus = (pcsSuccess, pcsElevationRequired, pcsFailed);
 
+  TTokenIntegrityLevel = (
+    ilUntrusted = $0000,
+    ilLow = $1000,
+    ilMedium = $2000,
+    ilHigh = $3000,
+    ilSystem = $4000
+  );
+
 /// <summary>
 ///  Checks if the current process runs in zero session.
 /// </summary>
@@ -83,6 +91,14 @@ function RunElevatedAndWait(const Cmd: WideString;
 ///  <c>ShellExecuteEx</c> because of lack of privileges.
 /// </summary>
 function ParentRequestedElevation: Boolean;
+
+/// <summary>
+///  Sets new integrity level of the token.
+///  The token should have <c>TOKEN_QUERY</c>
+///  and <c>TOKEN_ADJUST_DEFAULT</c> access.
+/// </summary>
+function SetTokenIntegrity(hToken: THandle;
+  IntegrityLevel: TTokenIntegrityLevel): Boolean;
 
 // From SysUtils
 function GetCurrentDir: string;
@@ -594,6 +610,25 @@ begin
     if ElevationMutex <> 0 then
       CloseHandle(ElevationMutex);
   end;
+end;
+
+function SetTokenIntegrity(hToken: THandle;
+  IntegrityLevel: TTokenIntegrityLevel): Boolean;
+const
+  SE_GROUP_INTEGRITY = $20;
+var
+  mandatoryLabelAuthority: SID_IDENTIFIER_AUTHORITY;
+  mandatoryLabel: TSIDAndAttributes;
+begin
+  FillChar(mandatoryLabelAuthority, SizeOf(mandatoryLabelAuthority), 0);
+  mandatoryLabelAuthority.Value[5] := 16; // SECURITY_MANDATORY_LABEL_AUTHORITY
+  mandatoryLabel.Sid := AllocMem(12);
+  InitializeSid(mandatoryLabel.Sid, mandatoryLabelAuthority, 1);
+  GetSidSubAuthority(mandatoryLabel.Sid, 0)^ := DWORD(IntegrityLevel);
+  mandatoryLabel.Attributes := SE_GROUP_INTEGRITY;
+  Result := SetTokenInformation(hToken, TokenIntegrityLevel, @mandatoryLabel,
+    SizeOf(TSIDAndAttributes));
+  FreeMem(mandatoryLabel.Sid);
 end;
 
 end.

@@ -24,17 +24,13 @@ uses
   ProcessUtils in '..\Include\ProcessUtils.pas',
   CmdUtils in '..\Include\CmdUtils.pas';
 
-//TODO: Set integrity to medium. See tokprp.c near line 870 from ProcessHacker
-
 const
   IFEO_KEY = '/IFEO'; // Makes sure we were launched from IFEO
 
 var
   IFEO_Enabled: Boolean;
-  hLevel, hToken: THandle;
-
-var
   StartFrom: integer;
+  hLevel, hToken: THandle;
 
 begin
   try
@@ -65,6 +61,9 @@ begin
     if not SaferComputeTokenFromLevel(hLevel, 0, @hToken, 0, nil) then
       Exit;
     SaferCloseLevel(hLevel);
+
+    // Now we should fix the integrity level and set it to medium
+    SetTokenIntegrity(hToken, ilMedium);
 
     if RunIgnoringIFEOAndWait(ParamsStartingFrom(StartFrom), hToken) =
       pcsElevationRequired then
