@@ -86,8 +86,8 @@ object ExecListDialog: TExecListDialog
         Height = 17
         Hint = 
           'Drop administrative privileges of the process. Even if the token' +
-          ' is still elevated adminstrators group membership is used for de' +
-          'ny only.'
+          ' is still elevated administrators group membership is used for d' +
+          'eny only.'
         Caption = 'Dro&p admin rights'
         TabOrder = 0
         OnClick = RadioButtonClick
@@ -141,7 +141,7 @@ object ExecListDialog: TExecListDialog
         Top = 20
         Width = 220
         Height = 17
-        Hint = 'Ask user befor starting the program'
+        Hint = 'Ask user before starting the program'
         Caption = '&Ask permission to start'
         Checked = True
         TabOrder = 5
