@@ -56,6 +56,6 @@ begin
 
     SetThreadExecutionState(ES_CONTINUOUS);
   except
-    ExitCode := ERROR_UNHANDLED_EXCEPTION;
+    ExitCode := STATUS_UNHANDLED_EXCEPTION;
   end;
 end.

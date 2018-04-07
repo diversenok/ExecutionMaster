@@ -25,7 +25,7 @@ const
   // Let the caller think process failed to start if the user has chosen "No".
   STATUS_DLL_INIT_FAILED = -1073741502; // $C0000142;
 
-  ERROR_UNHANDLED_EXCEPTION = $0000023E;
+  STATUS_UNHANDLED_EXCEPTION = -1073741500; // $C0000144;
 
 type
   TProcessCreationStatus = (pcsSuccess, pcsElevationRequired, pcsFailed);

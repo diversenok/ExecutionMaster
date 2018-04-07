@@ -48,7 +48,7 @@ begin
       MessageBoxW(0, PWideChar(Text + #$D#$A + ParamsStartingFrom(1)),
         PWideChar(CAPTION), FLAGS);
   except
-    ExitCode := ERROR_UNHANDLED_EXCEPTION;;
+    ExitCode := STATUS_UNHANDLED_EXCEPTION;;
   end;
 end.
 
