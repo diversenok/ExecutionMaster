@@ -453,7 +453,7 @@ begin
   SysDrive := '"' + GetEnvironmentVariable('SystemDrive');
   // TODO -cInstaller: Moving actions to Common Files
   ActionsFolder := ExtractFilePath(ParamStr(0));
-  //ActionsFolder := GetEnvironmentVariable('CommonProgramFiles') + '\';
+  //ActionsFolder := GetEnvironmentVariable('CommonProgramW6432') + '\';
 
   for a := Low(FileBasedActions) to High(FileBasedActions) do
     EMDebuggers[a] := Format(FileBasedActions[a], [ActionsFolder]);

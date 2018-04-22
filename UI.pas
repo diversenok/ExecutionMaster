@@ -76,6 +76,7 @@ type
   private
     Core: TImageFileExecutionOptions;
     CurrentAction: TAction;
+    procedure DisableActions;
   end;
 
 var
@@ -92,6 +93,10 @@ const
   ERR_ONLYNAME_CAPTION = 'Executable name';
   ERR_ACTION_CAPTION = 'Specified action not found';
   ERR_EMCSHELL = 'EMCShell component is missing.';
+  ERR_WOW64 = 'Looks like you are using a 32-bit version of the program on a ' +
+    '64-bit operating system. You should use the 64-bit version of ' +
+    'ExecutionMaster, otherwise, only denial actions will be available.';
+  ERR_WOW64_CAPTION = 'WOW64 is detected';
 
   INFO_REG = 'Shell extension was successfully registered.';
   INFO_UNREG = 'Shell extension was successfully uninstalled.';
@@ -234,10 +239,28 @@ begin
   ListViewExecChange(Sender, ListViewExec.Selected, ctState);
 end;
 
+procedure TExecListDialog.DisableActions;
+begin
+  RadioButtonAsk.Enabled := False;
+  RadioButtonDrop.Enabled := False;
+  RadioButtonElevate.Enabled := False;
+  RadioButtonNoSleep.Enabled := False;
+  RadioButtonDisplayOn.Enabled := False;
+  RadioButtonBlock.Checked := True;
+end;
+
 procedure TExecListDialog.FormCreate(Sender: TObject);
 const
   BCM_SETSHIELD = $160C;
+var
+  IsWow64: LongBool;
 begin
+  if IsWow64Process(GetCurrentProcess, IsWow64) and IsWow64 then
+  begin
+    MessageBox(Handle, ERR_WOW64, ERR_WOW64_CAPTION, MB_OK or MB_ICONWARNING);
+    DisableActions;
+  end;
+
   ElvationHandle := Handle;
   Application.HintHidePause := 20000;
   Constraints.MinHeight := Height;
