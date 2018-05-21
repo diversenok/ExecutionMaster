@@ -26,11 +26,16 @@ uses
   Registry2 in 'Include\Registry2.pas',
   CmdUtils in 'Include\CmdUtils.pas',
   ProcessUtils in 'Include\ProcessUtils.pas',
-  ShellExtension in 'Include\ShellExtension.pas';
+  ShellExtension in 'Include\ShellExtension.pas',
+  MessageDialog in 'Include\MessageDialog.pas';
 
-procedure MessageBox2(Text: PChar; Icon: Cardinal = MB_ICONINFORMATION);
+const
+  PROGRAM_NAME = 'Execution Master shell extension';
+
+procedure ShowStatusMessage(Verb: String; Text: String = '';
+  Icon: TMessageIcon = miInformation);
 begin
-  MessageBox(0, Text, 'Execution Master', MB_OK or MB_SYSTEMMODAL or Icon);
+  ShowMessageOk(PROGRAM_NAME, Verb, Text, Icon);
 end;
 
 procedure ActionReset;
@@ -41,23 +46,23 @@ begin
   try
     Core := TImageFileExecutionOptions.Create;
     for i := 0 to Core.Count - 1 do
-      begin
-        if ParamCount >= 2 then
-          if Core[i].TreatedFile <> ExtractFileName(ParamStr(2)) then
-            Continue;
-        Core.UnregisterDebugger(Core[i].TreatedFile);
-      end;
+    begin
+      if ParamCount >= 2 then
+        if Core[i].TreatedFile <> ExtractFileName(ParamStr(2)) then
+          Continue;
+      Core.UnregisterDebugger(Core[i].TreatedFile);
+    end;
   finally
     FreeAndNil(Core);
   end;
-  MessageBox2('The action was successfully reset.');
+  ShowStatusMessage('The action was successfully reset.');
 end;
 
-procedure CheckerUI(Text, Caption: string);
+procedure CheckerUI(Text: string);
 begin
-  if MessageBox(0, PChar(Text), PChar(Caption), MB_YESNO or
-    MB_ICONWARNING) <> IDYES then
-    raise Exception.Create('Canceled by user.');
+  if ShowMessageYesNo(PROGRAM_NAME, 'Are you sure?', Text, miWarning) <> IDYES
+    then
+    raise Exception.Create('The operation was canceled by the user.');
 end;
 
 procedure CheckForProblems(S: String);
@@ -67,14 +72,14 @@ begin
   for i := Low(DangerousProcesses) to High(DangerousProcesses) do
     if LowerCase(S) = DangerousProcesses[i] then
     begin
-      CheckerUI(Format(WARN_SYSPROC, [S]), WARN_SYSPROC_CAPTION);
+      CheckerUI(Format(WARN_SYSPROC, [S]));
       Break;
     end;
 
   for i := Low(CompatibilityProblems) to High(CompatibilityProblems) do
     if LowerCase(S) = CompatibilityProblems[i] then
     begin
-      CheckerUI(Format(WARN_COMPAT, [S]), WARN_COMPAT_CAPTION);
+      CheckerUI(Format(WARN_COMPAT, [S]));
       Break;
     end;
 end;
@@ -103,7 +108,7 @@ begin
   CheckForProblems(executable);
   Dbg := TIFEORec.Create(a, executable);
   TImageFileExecutionOptions.RegisterDebugger(Dbg);
-  MessageBox2('The action was successfully set.');
+  ShowStatusMessage('The action was successfully set.');
 end;
 
 begin
@@ -117,21 +122,20 @@ begin
       else if LowerCase(ParamStr(1)) = '/reg' then
       begin
         RegShellMenu(ParamStr(0));
-        MessageBox2('Shell extension was successfully registered.');
+        ShowStatusMessage('Shell extension was successfully registered.');
       end
       else if LowerCase(ParamStr(1)) = '/unreg' then
       begin
         UnregShellMenu;
-        MessageBox2('Shell extension was successfully unregistered.');
+        ShowStatusMessage('Shell extension was successfully unregistered.');
       end;
     end
     else
-      MessageBox2('Usage:'#$D#$A +
+      ShowStatusMessage('Usage:',
         'EMCShell.exe /reg - register shell extension;'#$D#$A +
         'EMCShell.exe /unreg - unregister shell extension.'#$D#$A);
   except
     on E: Exception do
-      MessageBox2(PChar('Action was not registered:'#$D#$A + E.ToString),
-        MB_ICONERROR);
+      ShowStatusMessage('The action was not registered:', E.ToString, miError);
   end;
 end.

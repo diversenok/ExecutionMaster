@@ -51,25 +51,25 @@ const
     'consent.exe', 'dllhost.exe');
 
   /// <summary> Warning for <c>DangerousProcesses</c>. </summary>
-  WARN_SYSPROC = '%s is a part of the system. Performing this action may ' +
-    'cause system instability. Are you sure?';
-  WARN_SYSPROC_CAPTION = 'System component';
+  WARN_SYSPROC = 'The file "%s" is a part of the system. Performing this ' +
+    'action may cause system instability. Continue anyway?';
 
   /// <summary> Some compatibility problems with specified processes. </summary>
   CompatibilityProblems: array [0 .. 3] of String = ('chrome.exe',
     'firefox.exe', 'browser.exe', 'iexplore.exe');
 
   /// <summary> Warning for <c>CompatibilityProblems</c>. </summary>
-  WARN_COMPAT = 'There are some compatibility problems with setting ' +
-  'actions on %s' + #$D#$A + 'This program may start to work incorrectly. ' +
-  'Are you sure?';
-  WARN_COMPAT_CAPTION = 'Compatibility problems';
+  WARN_COMPAT = 'There are some compatibility problems with setting actions ' +
+    'on "%s". This program may start to work incorrectly. Continue anyway?';
 
 var
   EMDebuggers: array [TAction] of string;
 
 const
-  ERR_ACTION = 'Can''t find executable file that performs specified action.' +
+  PROGRAM_NAME = 'Execution Master';
+  ARE_YOU_SURE = 'Are you sure?';
+
+  ERR_ACTION = 'Can''t find the executable that performs the specified action.' +
     #$D#$A + 'Some components of Execution Master are missing.';
 
 type

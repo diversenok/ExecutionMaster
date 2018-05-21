@@ -109,6 +109,7 @@
         <DCCReference Include="Include\CmdUtils.pas"/>
         <DCCReference Include="Include\ProcessUtils.pas"/>
         <DCCReference Include="Include\ShellExtension.pas"/>
+        <DCCReference Include="Include\MessageDialog.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

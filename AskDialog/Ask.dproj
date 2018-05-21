@@ -39,8 +39,6 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <DCC_PEOSVersion>6.0</DCC_PEOSVersion>
-        <DCC_PESubSysVersion>6.0</DCC_PESubSysVersion>
         <Icon_MainIcon>Ask.ico</Icon_MainIcon>
         <VerInfo_MinorVer>2</VerInfo_MinorVer>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -99,6 +97,7 @@
         </DelphiCompile>
         <DCCReference Include="..\Include\ProcessUtils.pas"/>
         <DCCReference Include="..\Include\CmdUtils.pas"/>
+        <DCCReference Include="..\Include\MessageDialog.pas"/>
         <None Include="Ask.todo"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>

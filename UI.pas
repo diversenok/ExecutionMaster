@@ -21,7 +21,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes,
   VCL.Graphics, VCL.Controls, VCL.Forms, VCL.Dialogs, VCL.ComCtrls,
-  VCL.StdCtrls, VCL.ExtCtrls, VCL.Buttons, Vcl.Menus, IFEO;
+  VCL.StdCtrls, VCL.ExtCtrls, VCL.Buttons, VCL.Menus, IFEO;
 
 type
   TExecListDialog = class(TForm)
@@ -84,23 +84,28 @@ var
 
 implementation
 
-uses ProcessUtils, Winapi.ShellApi, ShellExtension;
+uses ProcessUtils, Winapi.ShellApi, ShellExtension, MessageDialog;
 
 const
   GITHUB_PAGE = 'https://github.com/diversenok/ExecutionMaster';
 
+  ERR_ACTION_VERB = 'Some components are missing';
+  ERR_ACTION = 'Can''t find the executable that performs the specified action.';
+
+  ERR_ONLYNAME_VERB = 'Executable name';
   ERR_ONLYNAME = '"Executable name" should contain only file name, not a path.';
-  ERR_ONLYNAME_CAPTION = 'Executable name';
-  ERR_ACTION_CAPTION = 'Specified action not found';
-  ERR_EMCSHELL = 'EMCShell component is missing.';
+
+  ERR_WOW64_VERB = 'WOW64 is detected';
   ERR_WOW64 = 'Looks like you are using a 32-bit version of the program on a ' +
     '64-bit operating system. You should use the 64-bit version of ' +
     'ExecutionMaster, otherwise, only denial actions will be available.';
-  ERR_WOW64_CAPTION = 'WOW64 is detected';
 
+  ERR_EMCSHELL_VERB = 'Can''t install Shell extension';
+  ERR_EMCSHELL = 'EMCShell component is missing.';
+
+  INFO_REG_VERB = 'Success';
   INFO_REG = 'Shell extension was successfully registered.';
   INFO_UNREG = 'Shell extension was successfully uninstalled.';
-  INFO_REG_CAPTION = 'Success';
 
 {$R *.dfm}
 
@@ -137,7 +142,7 @@ end;
 
 procedure TExecListDialog.Refresh(Sender: TObject);
 var
-  i: integer;
+  i: Integer;
 begin
   if (Sender <> ButtonAdd) and (Sender <> ButtonDelete) then
   begin
@@ -189,36 +194,36 @@ end;
 
 procedure TExecListDialog.ButtonAddClick(Sender: TObject);
 var
-  i: integer;
+  i: Integer;
 begin
   if CurrentAction in [Low(TFileBasedAction)..High(TFileBasedAction)] then
     if not FileExists(Copy(EMDebuggers[CurrentAction], 2,
       Pos('"', EMDebuggers[CurrentAction], 2) - 2)) then // Only file without params
-      begin
-        MessageBox(Handle, PChar(ERR_ACTION), PChar(ERR_ACTION_CAPTION),
-         MB_OK or MB_ICONERROR);
-        Exit;
-      end;
+    begin
+      ShowMessageEx(Handle, PROGRAM_NAME, ERR_ACTION_VERB, ERR_ACTION, miError,
+        [mbOk]);
+      Exit;
+    end;
 
   if (Length(EditImage.Text) = 0) or (Pos('\', EditImage.Text) <> 0) or
-     (Pos('/', EditImage.Text) <> 0) or (Pos('"', EditImage.Text) <> 0) then
+    (Pos('/', EditImage.Text) <> 0) or (Pos('"', EditImage.Text) <> 0) then
   begin
-    MessageBox(Handle, PChar(ERR_ONLYNAME), PChar(ERR_ONLYNAME_CAPTION),
-     MB_OK or MB_ICONERROR);
+    ShowMessageEx(Handle, PROGRAM_NAME, ERR_ONLYNAME_VERB, ERR_ONLYNAME,
+      miError, [mbOk]);
     Exit;
   end;
 
   for i := Low(DangerousProcesses) to High(DangerousProcesses) do
     if LowerCase(EditImage.Text) = DangerousProcesses[i] then
-      if MessageBox(Handle, PChar(Format(WARN_SYSPROC, [EditImage.Text])),
-        PChar(WARN_SYSPROC_CAPTION), MB_YESNO or MB_ICONWARNING) <> IDYES then
+      if ShowMessageEx(Handle, PROGRAM_NAME, ARE_YOU_SURE, Format(WARN_SYSPROC,
+        [EditImage.Text]), miWarning, [mbYes, mbNo]) <> IDYES then
         Exit;
 
   if CurrentAction in [aAsk..aDisplayOn, aExecuteEx] then
     for i := Low(CompatibilityProblems) to High(CompatibilityProblems) do
       if LowerCase(EditImage.Text) = CompatibilityProblems[i] then
-        if MessageBox(Handle, PChar(Format(WARN_COMPAT, [EditImage.Text])),
-          PChar(WARN_COMPAT_CAPTION), MB_YESNO or MB_ICONWARNING) <> IDYES then
+        if ShowMessageEx(Handle, PROGRAM_NAME, ARE_YOU_SURE, Format(WARN_COMPAT,
+          [EditImage.Text]), miWarning, [mbYes, mbNo]) <> IDYES then
           Exit;
 
   Core.AddDebugger(TIFEORec.Create(CurrentAction, EditImage.Text,
@@ -257,7 +262,8 @@ var
 begin
   if IsWow64Process(GetCurrentProcess, IsWow64) and IsWow64 then
   begin
-    MessageBox(Handle, ERR_WOW64, ERR_WOW64_CAPTION, MB_OK or MB_ICONWARNING);
+    ShowMessageEx(Handle, PROGRAM_NAME, ERR_WOW64_VERB, ERR_WOW64, miWarning,
+      [mbOk]);
     DisableActions;
   end;
 
@@ -273,7 +279,7 @@ begin
   Refresh(Sender);
 end;
 
-{ Menu items}
+{ Menu items }
 
 procedure TExecListDialog.MenuRunAsAdminClick(Sender: TObject);
 begin
@@ -283,16 +289,22 @@ end;
 
 procedure TExecListDialog.MenuRegClick(Sender: TObject);
 begin
-  if not FileExists(ExtractFilePath(ParamStr(0)) + 'EMCShell.exe') then
-    raise Exception.Create(ERR_EMCSHELL);  
-  RegShellMenu(ExtractFilePath(ParamStr(0)) + 'EMCShell.exe');
-  MessageBox(Handle, INFO_REG, INFO_REG_CAPTION, MB_OK or MB_ICONINFORMATION);
+  if FileExists(ExtractFilePath(ParamStr(0)) + 'EMCShell.exe') then
+  begin
+    RegShellMenu(ExtractFilePath(ParamStr(0)) + 'EMCShell.exe');
+    ShowMessageEx(Handle, PROGRAM_NAME, INFO_REG_VERB, INFO_REG, miInformation,
+      [mbOk]);
+  end
+  else
+    ShowMessageEx(Handle, PROGRAM_NAME, ERR_EMCSHELL_VERB, ERR_EMCSHELL,
+      miError, [mbOk])
 end;
 
 procedure TExecListDialog.MenuUnregClick(Sender: TObject);
 begin
   UnregShellMenu;
-  MessageBox(Handle, INFO_UNREG, INFO_REG_CAPTION, MB_OK or MB_ICONINFORMATION);
+  ShowMessageEx(Handle, PROGRAM_NAME, INFO_REG_VERB, INFO_UNREG, miInformation,
+    [mbOk]);
 end;
 
 procedure TExecListDialog.MenuSourceClick(Sender: TObject);

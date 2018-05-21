@@ -106,6 +106,7 @@
         </DelphiCompile>
         <DCCReference Include="..\Include\ProcessUtils.pas"/>
         <DCCReference Include="..\Include\CmdUtils.pas"/>
+        <DCCReference Include="..\Include\MessageDialog.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -156,6 +157,12 @@
                 </DeployFile>
                 <DeployFile LocalName="Win64\Debug\Deny.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win64">
+                        <RemoteName>Deny.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\Win32-Release\Actions\Deny.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32">
                         <RemoteName>Deny.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>

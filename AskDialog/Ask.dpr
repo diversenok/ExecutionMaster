@@ -21,14 +21,12 @@ program Ask;
 uses
   Winapi.Windows,
   ProcessUtils in '..\Include\ProcessUtils.pas',
-  CmdUtils in '..\Include\CmdUtils.pas';
-
-const
-  FLAGS = MB_YESNO or MB_TOPMOST or MB_ICONWARNING; // MessageBox design
+  CmdUtils in '..\Include\CmdUtils.pas',
+  MessageDialog in '..\Include\MessageDialog.pas';
 
 resourcestring
-  CAPTION = 'User''s approvement is required';
-  TEXT = 'Confirm the program to start:';
+  CAPTION = 'Execution Master: approval is required';
+  VERB = 'Do you want to run this program?';
 
 procedure Run;
 begin
@@ -51,11 +49,10 @@ begin
       instead. }
     if IsZeroSession or ParentRequestedElevation then
       Run
-    else if MessageBoxW(0, PWideChar(Text + #$D#$A + ParamsStartingFrom(1)),
-      PWideChar(CAPTION), FLAGS) = IDYES then
+    else if ShowMessageYesNo(CAPTION, VERB, ParamsStartingFrom(1), miWarning) =
+      IDYES then
       Run;
   except
     ExitCode := STATUS_UNHANDLED_EXCEPTION;
   end;
 end.
-

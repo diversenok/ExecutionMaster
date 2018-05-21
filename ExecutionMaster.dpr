@@ -24,7 +24,8 @@ uses
   IFEO in 'Include\IFEO.pas',
   ProcessUtils in 'Include\ProcessUtils.pas',
   ShellExtension in 'Include\ShellExtension.pas',
-  Registry2 in 'Include\Registry2.pas';
+  Registry2 in 'Include\Registry2.pas',
+  MessageDialog in 'Include\MessageDialog.pas';
 
 {$R *.res}
 

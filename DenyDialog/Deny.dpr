@@ -21,15 +21,15 @@ program Deny;
 uses
   Winapi.Windows,
   ProcessUtils in '..\Include\ProcessUtils.pas',
-  CmdUtils in '..\Include\CmdUtils.pas';
+  CmdUtils in '..\Include\CmdUtils.pas',
+  MessageDialog in '..\Include\MessageDialog.pas';
 
 const
-  FLAGS = MB_OK or MB_TOPMOST or MB_ICONSTOP; // MessageBox design
   KEY_QUIET = '/quiet'; // Parameter: do not show dialog
 
 resourcestring
-  CAPTION = 'The program is blocked';
-  TEXT = 'The program start was blocked:';
+  CAPTION = 'Execution Master: an attempt to run a blocked program';
+  VERB = 'This program is not allowed to run:';
 
 begin
   try
@@ -45,8 +45,7 @@ begin
       can't rely on it, and it also doesn't cover \Winlogon Desktop), so we
       wouldn't show any messages in that case. }
     if not IsZeroSession then
-      MessageBoxW(0, PWideChar(Text + #$D#$A + ParamsStartingFrom(1)),
-        PWideChar(CAPTION), FLAGS);
+      ShowMessageOk(CAPTION, VERB, ParamsStartingFrom(1), miError);
   except
     ExitCode := STATUS_UNHANDLED_EXCEPTION;;
   end;

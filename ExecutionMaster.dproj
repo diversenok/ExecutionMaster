@@ -94,6 +94,7 @@
         <DCCReference Include="Include\ProcessUtils.pas"/>
         <DCCReference Include="Include\ShellExtension.pas"/>
         <DCCReference Include="Include\Registry2.pas"/>
+        <DCCReference Include="Include\MessageDialog.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -122,6 +123,12 @@
             <Deployment Version="1">
                 <DeployFile LocalName="Win32\Debug\ExecutionMaster.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
+                        <RemoteName>ExecutionMaster.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Win64-Release\ExecutionMaster.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win64">
                         <RemoteName>ExecutionMaster.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
