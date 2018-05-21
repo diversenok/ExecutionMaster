@@ -30,17 +30,18 @@ resourcestring
 
 procedure Run;
 begin
+  if ParamCount = 0 then
+  begin
+    ExitCode := ERROR_INVALID_PARAMETER;
+    Exit;
+  end;
+
   if RunIgnoringIFEOAndWait(ParamsStartingFrom(1)) = pcsElevationRequired then
     RunElevatedAndWait(ParamsStartingFrom(1));
 end;
 
 begin
   try
-    // Actually, Image-File-Execution-Options always pass one or more parameters
-    ExitCode := ERROR_INVALID_PARAMETER;
-    if ParamCount = 0 then
-      Exit;
-
     ExitCode := STATUS_DLL_INIT_FAILED; // Run overwrites it on success
 
     { User can't normally interact with Session 0 (except UI0Detect, but we

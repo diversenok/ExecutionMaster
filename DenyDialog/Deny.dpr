@@ -33,10 +33,6 @@ resourcestring
 
 begin
   try
-    ExitCode := ERROR_INVALID_PARAMETER;
-    if ParamCount = 0 then
-      Exit;
-
     ExitCode := STATUS_DLL_INIT_FAILED;
     if ParamStr(1) = KEY_QUIET then
       Exit;
