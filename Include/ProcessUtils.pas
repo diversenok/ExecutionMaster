@@ -481,8 +481,8 @@ begin
   begin
     // Using TStartupInfoExW with EXTENDED_STARTUPINFO_PRESENT
     SIEX.StartupInfo.cb := SizeOf(TStartupInfoExW);
-    
-    if hToken <> 0 then    
+
+    if hToken <> 0 then
     begin // An external token is provided
       if CreateProcessAsUserExW(hToken, nil, PWideChar(Cmd), nil, nil, True,
         DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS or EXTENDED_STARTUPINFO_PRESENT,
@@ -507,7 +507,7 @@ begin
   else
   begin
     // Using TStartupInfo
-    SIEX.StartupInfo.cb := SizeOf(TStartupInfo);    
+    SIEX.StartupInfo.cb := SizeOf(TStartupInfo);
     if hToken <> 0 then
     begin
       if CreateProcessAsUserW(hToken, nil, PWideChar(Cmd), nil, nil, True,
@@ -527,13 +527,13 @@ begin
         Result := pcsElevationRequired;
     end;
   end;
-  
+
   if Result = pcsSuccess then
   begin
     DebugSetProcessKillOnExit(False); // Should be called after CreateProcess
     if not DebugActiveProcessStop(PI.dwProcessId) then // Detaching
       DebuggerRunAttached; // This really shouldn't happen, but who knows...
-  end;  
+  end;
 end;
 
 function RunIgnoringIFEOAndWait;
