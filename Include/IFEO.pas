@@ -449,7 +449,10 @@ var
   a: TAction;
   ActionsFolder, SysDrive: string;
 begin
-  ProcessIsElevated := ProcessUtils.IsElevated;
+  if TOSVersion.Major < 6 then
+    ProcessIsElevated := True // XP
+  else
+    ProcessIsElevated := ProcessUtils.IsElevated;
   SysDrive := '"' + GetEnvironmentVariable('SystemDrive');
   // TODO -cInstaller: Moving actions to Common Files
   ActionsFolder := ExtractFilePath(ParamStr(0));

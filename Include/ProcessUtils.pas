@@ -210,7 +210,7 @@ function CreateProcessAsUserExW(hToken: THandle; lpApplicationName: LPCWSTR;
 function InitializeProcThreadAttributeList(lpAttributeList
   : PProcThreadAttributeEntry; dwAttributeCount: DWORD; dwFlags: DWORD;
   var lpSize: SIZE_T): BOOL; stdcall;
-  external kernel32 name 'InitializeProcThreadAttributeList';
+  external kernel32 name 'InitializeProcThreadAttributeList' delayed;
 
 /// <summary>
 ///  Updates the specified attribute in a list of attributes for process and
@@ -219,14 +219,14 @@ function InitializeProcThreadAttributeList(lpAttributeList
 function UpdateProcThreadAttribute(lpAttributeList: PProcThreadAttributeEntry;
   dwFlags: DWORD; Attribute: DWORD_PTR; lpValue: PVOID; cbSize: SIZE_T;
   lpPreviousValue: PVOID = nil; lpReturnSize: PSIZE_T = nil): BOOL; stdcall;
-  external kernel32 name 'UpdateProcThreadAttribute';
+  external kernel32 name 'UpdateProcThreadAttribute' delayed;
 
 /// <summary>
 ///  Deletes the specified list of attributes for process and thread creation.
 /// </summary>
 procedure DeleteProcThreadAttributeList(lpAttributeList
   : PProcThreadAttributeEntry);
-  external kernel32 name 'DeleteProcThreadAttributeList';
+  external kernel32 name 'DeleteProcThreadAttributeList' delayed;
 
 { -------- User defined -------- }
 
@@ -234,16 +234,23 @@ const
   /// <summary> See <c>RunElevated</c>. </summary>
   MUTEX_NAME: AnsiString = 'Elevating:';
 
+function IsBelowVista: Boolean;
+var
+  Version: OSVERSIONINFO;
+begin
+  Result := GetVersionEx(Version) and (Version.dwMajorVersion < 6);
+end;
+
 function IsZeroSession: Boolean;
 var
   TokenHandle: THandle;
   Session, BufferSize: DWORD;
 begin
   Result := False;
-  BufferSize := SizeOf(Session);
+  if IsBelowVista then // Lie for Windows XP
+    Exit;
   if OpenProcessToken(GetCurrentProcess, TOKEN_QUERY, TokenHandle) then
   begin
-    BufferSize := SizeOf(Session);
     if GetTokenInformation(TokenHandle, TokenSessionId, @Session,
       SizeOf(Session), BufferSize) then
       Result := Session = 0;
@@ -477,7 +484,9 @@ begin
 
   { Creating process under the debugger. This action wouldn't be intercepted by
     Image-File-Execution-Options, so we wouldn't launch ourselves again. }
-  if SetNewParent(hNewParent, SIEX) then // Try to prepare SIEX.lpAttributeList
+
+  // SetNewParent tries to prepare SIEX.lpAttributeList
+  if not IsBelowVista and SetNewParent(hNewParent, SIEX) then
   begin
     // Using TStartupInfoExW with EXTENDED_STARTUPINFO_PRESENT
     SIEX.StartupInfo.cb := SizeOf(TStartupInfoExW);
