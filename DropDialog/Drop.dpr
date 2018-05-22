@@ -31,6 +31,7 @@ var
   IFEO_Enabled: Boolean;
   StartFrom: integer;
   hLevel, hToken: THandle;
+  UIAccess: DWORD;
 
 begin
   try
@@ -64,6 +65,10 @@ begin
 
     // Now we should fix the integrity level and set it to medium
     SetTokenIntegrity(hToken, ilMedium);
+
+    // And also disable UIAccess flag
+    UIAccess := 0;
+    SetTokenInformation(hToken, TokenUIAccess, @UIAccess, SizeOf(UIAccess));
 
     if RunIgnoringIFEOAndWait(ParamsStartingFrom(StartFrom), hToken) =
       pcsElevationRequired then
