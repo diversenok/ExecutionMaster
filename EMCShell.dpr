@@ -1,4 +1,4 @@
-{ ExecutionMaster component.
+﻿{ ExecutionMaster component.
   Copyright (C) 2018 diversenok
 
   This program is free software: you can redistribute it and/or modify
@@ -111,7 +111,7 @@ begin
   CheckForProblems(executable);
   Dbg := TIFEORec.Create(a, executable);
   TImageFileExecutionOptions.RegisterDebugger(Dbg);
-  ShowStatusMessage('The action was successfully set.', executable + '  >  ' +
+  ShowStatusMessage('The action was successfully set.', executable + '  →  ' +
     Dbg.GetCaption);
 end;
 
