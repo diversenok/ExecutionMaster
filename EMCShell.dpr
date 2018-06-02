@@ -41,21 +41,24 @@ end;
 procedure ActionReset;
 var
   Core: TImageFileExecutionOptions;
+  executable: String;
   i: integer;
 begin
+  executable := ExtractFileName(ParamStr(2));
   try
     Core := TImageFileExecutionOptions.Create;
     for i := 0 to Core.Count - 1 do
     begin
       if ParamCount >= 2 then
-        if Core[i].TreatedFile <> ExtractFileName(ParamStr(2)) then
+        if Core[i].TreatedFile <> executable then
           Continue;
       Core.UnregisterDebugger(Core[i].TreatedFile);
+      Break;
     end;
   finally
     FreeAndNil(Core);
   end;
-  ShowStatusMessage('The action was successfully reset.');
+  ShowStatusMessage('The action was successfully reset.', executable);
 end;
 
 procedure CheckerUI(Text: string);
@@ -108,7 +111,8 @@ begin
   CheckForProblems(executable);
   Dbg := TIFEORec.Create(a, executable);
   TImageFileExecutionOptions.RegisterDebugger(Dbg);
-  ShowStatusMessage('The action was successfully set.');
+  ShowStatusMessage('The action was successfully set.', executable + '  >  ' +
+    Dbg.GetCaption);
 end;
 
 begin
