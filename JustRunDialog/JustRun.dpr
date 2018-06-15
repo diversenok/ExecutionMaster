@@ -20,16 +20,56 @@ program JustRun;
 
 uses
   Winapi.Windows,
+  Winapi.ShellApi,
   CmdUtils in '..\Include\CmdUtils.pas',
   ProcessUtils in '..\Include\ProcessUtils.pas';
+
+resourcestring
+  NO_WAIT = '/nowait';
+
+function RunIgnoringIFEOAndNoWait(const Cmd: WideString): TProcessCreationStatus;
+var
+  PI: TProcessInformation;
+begin
+  Result := RunIgnoringIFEO(PI, Cmd);
+  if Result = pcsSuccess then
+  begin
+    CloseHandle(PI.hProcess);
+    CloseHandle(PI.hThread);
+  end;
+end;
+
+function RunElevatedAndNoWait(const Cmd: WideString): TProcessCreationStatus;
+var
+  EI: TShellExecuteInfoW;
+  ElevationMutex: THandle;
+begin
+  Result := RunElevated(EI, ElevationMutex, Cmd);
+  if Result = pcsSuccess then
+  begin
+    CloseHandle(EI.hProcess);
+    CloseHandle(ElevationMutex);
+  end;
+end;
 
 begin
   try
     if ParamCount = 0 then
       Halt(ERROR_INVALID_PARAMETER);
 
-    if RunIgnoringIFEOAndWait(ParamsStartingFrom(1)) = pcsElevationRequired then
-      RunElevatedAndWait(ParamsStartingFrom(1));
+    if ParamStr(1) = NO_WAIT then
+    begin
+      if ParamCount < 2 then
+        Halt(ERROR_INVALID_PARAMETER);
+
+      if RunIgnoringIFEOAndNoWait(ParamsStartingFrom(2)) = pcsElevationRequired
+        then RunElevatedAndNoWait(ParamsStartingFrom(2));
+    end
+    else
+    begin
+      if RunIgnoringIFEOAndWait(ParamsStartingFrom(1)) = pcsElevationRequired
+        then RunElevatedAndWait(ParamsStartingFrom(1));
+    end;
   except
     ExitCode := STATUS_UNHANDLED_EXCEPTION;
   end;

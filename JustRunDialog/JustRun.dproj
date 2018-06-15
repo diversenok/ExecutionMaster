@@ -65,12 +65,12 @@
     <PropertyGroup Condition="'$(Base)'!=''">
         <Icon_MainIcon>JustRun.ico</Icon_MainIcon>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <VerInfo_Release>24</VerInfo_Release>
+        <VerInfo_Release>25</VerInfo_Release>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
         <VerInfo_Locale>1049</VerInfo_Locale>
         <VerInfo_MinorVer>6</VerInfo_MinorVer>
         <SanitizedProjectName>JustRun</SanitizedProjectName>
-        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Runs a process bypassing IFEO;FileVersion=1.6.24.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/issues/2;OriginalFilename=JustRun.exe;ProductName=Execution Master component: JustRun;ProductVersion=1.6;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Runs a process bypassing IFEO;FileVersion=1.6.25.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/issues/2;OriginalFilename=JustRun.exe;ProductName=Execution Master component: JustRun;ProductVersion=1.6;Comments=</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <DCC_DcuOutput>..\__dcu\$(Platform)-$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\$(Platform)-$(Config)</DCC_ExeOutput>
