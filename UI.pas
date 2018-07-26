@@ -21,11 +21,11 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes,
   VCL.Graphics, VCL.Controls, VCL.Forms, VCL.Dialogs, VCL.ComCtrls,
-  VCL.StdCtrls, VCL.ExtCtrls, VCL.Buttons, VCL.Menus, IFEO;
+  VCL.StdCtrls, VCL.ExtCtrls, VCL.Buttons, VCL.Menus, IFEO, System.ImageList,
+  Vcl.ImgList;
 
 type
   TExecListDialog = class(TForm)
-    PanelRight: TPanel;
     GroupBoxActions: TGroupBox;
     ListViewExec: TListView;
     EditImage: TEdit;
@@ -35,12 +35,9 @@ type
     ButtonBrowseExec: TButton;
     OpenDlg: TOpenDialog;
     LabelNote: TLabel;
-    PanelLeft: TPanel;
-    PanelBottom: TPanel;
     ButtonRefresh: TBitBtn;
     ButtonDelete: TButton;
     ButtonAdd: TButton;
-    PanelAdd: TPanel;
     MainMenu: TMainMenu;
     MenuFile: TMenuItem;
     MenuRunAsAdmin: TMenuItem;
@@ -49,7 +46,6 @@ type
     MenuReg: TMenuItem;
     MenuUnreg: TMenuItem;
     N2: TMenuItem;
-    PanelTopRight: TPanel;
     RadioButtonAsk: TRadioButton;
     RadioButtonBlock: TRadioButton;
     RadioButtonElevate: TRadioButton;
@@ -59,6 +55,7 @@ type
     RadioButtonError: TRadioButton;
     ComboBoxErrorCodes: TComboBox;
     RadioButtonExecute: TRadioButton;
+    ImageList: TImageList;
     procedure ButtonBrowseClick(Sender: TObject);
     procedure ButtonBrowseExecClick(Sender: TObject);
     procedure RadioButtonClick(Sender: TObject);
@@ -78,6 +75,7 @@ type
     Core: TImageFileExecutionOptions;
     CurrentAction: TAction;
     procedure DisableActions;
+    procedure InitMenuShieldIcon;
   end;
 
 var
@@ -85,7 +83,8 @@ var
 
 implementation
 
-uses ProcessUtils, Winapi.ShellApi, ShellExtension, MessageDialog;
+uses ProcessUtils, Winapi.ShellApi, ShellExtension, MessageDialog,
+  Winapi.ShlObj, Winapi.ShLwApi;
 
 const
   GITHUB_PAGE = 'https://github.com/diversenok/ExecutionMaster';
@@ -261,8 +260,6 @@ begin
 end;
 
 procedure TExecListDialog.FormCreate(Sender: TObject);
-const
-  BCM_SETSHIELD = $160C;
 var
   IsWow64: LongBool;
 begin
@@ -277,12 +274,31 @@ begin
   Application.HintHidePause := 20000;
   Constraints.MinHeight := Height;
   MenuRunAsAdmin.Enabled := not ProcessIsElevated;
+  SHAutoComplete(EditExec.Handle, SHACF_FILESYS_ONLY);
   if not ProcessIsElevated then
-  begin // UAC Shield on buttons
-    SendMessage(ButtonDelete.Handle, BCM_SETSHIELD, 0, 1);
-    SendMessage(ButtonAdd.Handle, BCM_SETSHIELD, 0, 1);
-  end;
+    InitMenuShieldIcon;
   Refresh(Sender);
+end;
+
+procedure TExecListDialog.InitMenuShieldIcon;
+var
+  SII: TSHStockIconInfo;
+  Small, Large: HICON;
+  Icon: TIcon;
+begin
+  FillChar(SII, SizeOf(SII), 0);
+  SII.cbSize := SizeOf(SII);
+
+  if SHGetStockIconInfo(SIID_SHIELD, SHGSI_ICONLOCATION, SII) <> S_OK then
+    Exit;
+  if SHDefExtractIcon(SII.szPath, SII.iIcon, 0, Large, Small, 16) <> S_OK then
+    Exit;
+
+  DestroyIcon(Large);
+  Icon := TIcon.Create;
+  Icon.Handle := Small;
+  MenuRunAsAdmin.ImageIndex := ImageList.AddIcon(Icon);
+  Icon.Free;
 end;
 
 { Menu items }
