@@ -23,6 +23,13 @@ uses
   CmdUtils in '..\Include\CmdUtils.pas',
   ProcessUtils in '..\Include\ProcessUtils.pas';
 
+// Since try..except doesn't work without System.SysUtils
+// we should handle all exceptions on our own.
+function HaltOnException(P: PExceptionRecord): IntPtr;
+begin
+  Halt(STATUS_UNHANDLED_EXCEPTION);
+end;
+
 const
   KEY_DISPLAY = '/display';
 
@@ -30,32 +37,30 @@ var
   StartFrom: integer;
 
 begin
-  try
-    // Actually, Image-File-Execution-Options always pass one or more parameters
-    ExitCode := ERROR_INVALID_PARAMETER;
-    if ParamCount = 0 then
+  ExceptObjProc := @HaltOnException;
+
+  // Actually, Image-File-Execution-Options always pass one or more parameters
+  ExitCode := ERROR_INVALID_PARAMETER;
+  if ParamCount = 0 then
+    Exit;
+
+  if ParamStr(1) = KEY_DISPLAY then
+  begin
+    if ParamCount = 1 then
       Exit;
-
-    if ParamStr(1) = KEY_DISPLAY then
-    begin
-      if ParamCount = 1 then
-        Exit;
-      StartFrom := 2;
-      SetThreadExecutionState(ES_DISPLAY_REQUIRED or ES_CONTINUOUS);
-    end
-    else
-    begin
-      StartFrom := 1;
-      SetThreadExecutionState(ES_SYSTEM_REQUIRED or ES_CONTINUOUS);
-    end;
-
-    ExitCode := STATUS_DLL_INIT_FAILED;  // It will be overwritten on success
-    if RunIgnoringIFEOAndWait(ParamsStartingFrom(StartFrom)) =
-      pcsElevationRequired then
-      RunElevatedAndWait(ParamsStartingFrom(StartFrom));
-
-    SetThreadExecutionState(ES_CONTINUOUS);
-  except
-    ExitCode := STATUS_UNHANDLED_EXCEPTION;
+    StartFrom := 2;
+    SetThreadExecutionState(ES_DISPLAY_REQUIRED or ES_CONTINUOUS);
+  end
+  else
+  begin
+    StartFrom := 1;
+    SetThreadExecutionState(ES_SYSTEM_REQUIRED or ES_CONTINUOUS);
   end;
+
+  ExitCode := STATUS_DLL_INIT_FAILED;  // It will be overwritten on success
+  if RunIgnoringIFEOAndWait(ParamsStartingFrom(StartFrom)) =
+    pcsElevationRequired then
+    RunElevatedAndWait(ParamsStartingFrom(StartFrom));
+
+  SetThreadExecutionState(ES_CONTINUOUS);
 end.

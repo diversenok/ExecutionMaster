@@ -14,6 +14,7 @@ object ExecListDialog: TExecListDialog
   Menu = MainMenu
   OldCreateOrder = False
   ShowHint = True
+  OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13

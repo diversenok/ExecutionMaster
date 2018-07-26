@@ -73,6 +73,7 @@ type
     procedure MenuRegClick(Sender: TObject);
     procedure MenuUnregClick(Sender: TObject);
     procedure MenuSourceClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     Core: TImageFileExecutionOptions;
     CurrentAction: TAction;
@@ -252,6 +253,11 @@ begin
   RadioButtonNoSleep.Enabled := False;
   RadioButtonDisplayOn.Enabled := False;
   RadioButtonBlock.Checked := True;
+end;
+
+procedure TExecListDialog.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Core.Free;
 end;
 
 procedure TExecListDialog.FormCreate(Sender: TObject);

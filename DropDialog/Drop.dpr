@@ -24,6 +24,13 @@ uses
   ProcessUtils in '..\Include\ProcessUtils.pas',
   CmdUtils in '..\Include\CmdUtils.pas';
 
+// Since try..except doesn't work without System.SysUtils
+// we should handle all exceptions on our own.
+function HaltOnException(P: PExceptionRecord): IntPtr;
+begin
+  Halt(STATUS_UNHANDLED_EXCEPTION);
+end;
+
 const
   IFEO_KEY = '/IFEO'; // Makes sure we were launched from IFEO
 
@@ -34,55 +41,53 @@ var
   UIAccess: DWORD;
 
 begin
-  try
-    // Actually, Image-File-Execution-Options always pass one or more parameters
-    ExitCode := ERROR_INVALID_PARAMETER;
-    if ParamCount = 0 then
-      Exit;
+  ExceptObjProc := @HaltOnException;
 
-    // making sure we were launched by IFEO
-    IFEO_Enabled := ParamStr(1) = IFEO_KEY;
-    if IFEO_Enabled and (ParamCount = 1) then
-      Exit;
+  // Actually, Image-File-Execution-Options always pass one or more parameters
+  ExitCode := ERROR_INVALID_PARAMETER;
+  if ParamCount = 0 then
+    Exit;
 
+  // making sure we were launched by IFEO
+  IFEO_Enabled := ParamStr(1) = IFEO_KEY;
+  if IFEO_Enabled and (ParamCount = 1) then
+    Exit;
+
+  if IFEO_Enabled then
+    StartFrom := 2
+  else
+    StartFrom := 1;
+
+  ExitCode := STATUS_DLL_INIT_FAILED; // It will be overwritten on success
+
+  // Trying to handle it without UAC
+  SetEnvironmentVariable('__COMPAT_LAYER', 'RunAsInvoker');
+
+  // Creating restricted token
+  if not SaferCreateLevel(SAFER_SCOPEID_USER, SAFER_LEVELID_NORMALUSER,
+    SAFER_LEVEL_OPEN, hLevel, nil) then
+    Exit;
+  if not SaferComputeTokenFromLevel(hLevel, 0, @hToken, 0, nil) then
+    Exit;
+  SaferCloseLevel(hLevel);
+
+  // Now we should fix the integrity level and set it to medium
+  SetTokenIntegrity(hToken, ilMedium);
+
+  // And also disable UIAccess flag
+  UIAccess := 0;
+  SetTokenInformation(hToken, TokenUIAccess, @UIAccess, SizeOf(UIAccess));
+
+  if RunIgnoringIFEOAndWait(ParamsStartingFrom(StartFrom), hToken) =
+    pcsElevationRequired then
+  begin
     if IFEO_Enabled then
-      StartFrom := 2
-    else
-      StartFrom := 1;
-
-    ExitCode := STATUS_DLL_INIT_FAILED; // It will be overwritten on success
-
-    // Trying to handle it without UAC
-    SetEnvironmentVariable('__COMPAT_LAYER', 'RunAsInvoker');
-
-    // Creating restricted token
-    if not SaferCreateLevel(SAFER_SCOPEID_USER, SAFER_LEVELID_NORMALUSER,
-      SAFER_LEVEL_OPEN, hLevel, nil) then
-      Exit;
-    if not SaferComputeTokenFromLevel(hLevel, 0, @hToken, 0, nil) then
-      Exit;
-    SaferCloseLevel(hLevel);
-
-    // Now we should fix the integrity level and set it to medium
-    SetTokenIntegrity(hToken, ilMedium);
-
-    // And also disable UIAccess flag
-    UIAccess := 0;
-    SetTokenInformation(hToken, TokenUIAccess, @UIAccess, SizeOf(UIAccess));
-
-    if RunIgnoringIFEOAndWait(ParamsStartingFrom(StartFrom), hToken) =
-      pcsElevationRequired then
-    begin
-      if IFEO_Enabled then
-        RunElevatedAndWait(ParamsStartingFrom(StartFrom))
-      else // We can't rely on Image-File-Execution-Options
-        RunElevatedAndWait('"' + ParamStr(0) + '" ' + ParamsStartingFrom(1))
-        { In this case the only way to launch the program with restricted but
-          elevated token is to start it from another instance of Drop.exe
-          with higher privileges.}
-    end;
-    CloseHandle(hToken);
-  except
-    ExitCode := STATUS_UNHANDLED_EXCEPTION;
+      RunElevatedAndWait(ParamsStartingFrom(StartFrom))
+    else // We can't rely on Image-File-Execution-Options
+      RunElevatedAndWait('"' + ParamStr(0) + '" ' + ParamsStartingFrom(1))
+      { In this case the only way to launch the program with restricted but
+        elevated token is to start it from another instance of Drop.exe
+        with higher privileges.}
   end;
+  CloseHandle(hToken);
 end.

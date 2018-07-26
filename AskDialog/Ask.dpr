@@ -24,9 +24,17 @@ uses
   CmdUtils in '..\Include\CmdUtils.pas',
   MessageDialog in '..\Include\MessageDialog.pas';
 
+// Since try..except doesn't work without System.SysUtils
+// we should handle all exceptions on our own.
+function HaltOnException(P: PExceptionRecord): IntPtr;
+begin
+  Halt(STATUS_UNHANDLED_EXCEPTION);
+end;
+
 resourcestring
   CAPTION = 'Execution Master: approval is required';
   VERB = 'Do you want to run this program?';
+  YES_KEY = '/yes'; // don't ask the user
 
 procedure Run;
 begin
@@ -41,19 +49,16 @@ begin
 end;
 
 begin
-  try
-    ExitCode := STATUS_DLL_INIT_FAILED; // Run overwrites it on success
+  ExceptObjProc := @HaltOnException;
+  ExitCode := STATUS_DLL_INIT_FAILED; // Run overwrites it on success
 
-    { User can't normally interact with Session 0 (except UI0Detect, but we
-      can't rely on it, and it also doesn't cover \Winlogon Desktop), so we
-      automatically accept "Yes" in that case. If you want "No" — use Deny.exe
-      instead. }
-    if IsZeroSession or ParentRequestedElevation then
-      Run
-    else if ShowMessageYesNo(CAPTION, VERB, ParamsStartingFrom(1), miWarning) =
-      IDYES then
-      Run;
-  except
-    ExitCode := STATUS_UNHANDLED_EXCEPTION;
-  end;
+  { User can't normally interact with Session 0 (except UI0Detect, but we
+    can't rely on it, and it also doesn't cover \Winlogon Desktop), so we
+    automatically accept "Yes" in that case. If you want "No" — use Deny.exe
+    instead. }
+  if IsZeroSession or ParentRequestedElevation then
+    Run
+  else if ShowMessageYesNo(CAPTION, VERB, ParamsStartingFrom(1), miWarning) =
+    IDYES then
+    Run;
 end.

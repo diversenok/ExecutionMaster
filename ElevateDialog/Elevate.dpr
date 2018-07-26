@@ -23,19 +23,24 @@ uses
   ProcessUtils in '..\Include\ProcessUtils.pas',
   CmdUtils in '..\Include\CmdUtils.pas';
 
+// Since try..except doesn't work without System.SysUtils
+// we should handle all exceptions on our own.
+function HaltOnException(P: PExceptionRecord): IntPtr;
 begin
-  try
-    // Actually, Image-File-Execution-Options always pass one or more parameters
-    ExitCode := ERROR_INVALID_PARAMETER;
-    if ParamCount = 0 then
-      Exit;
+  Halt(STATUS_UNHANDLED_EXCEPTION);
+end;
 
-    ExitCode := STATUS_DLL_INIT_FAILED; // It will be overwritten on success
-    if IsElevated then
-      RunIgnoringIFEOAndWait(ParamsStartingFrom(1))
-    else
-      RunElevatedAndWait(ParamsStartingFrom(1));
-  except
-    ExitCode := STATUS_UNHANDLED_EXCEPTION;
-  end;
+begin
+  ExceptObjProc := @HaltOnException;
+
+  // Actually, Image-File-Execution-Options always pass one or more parameters
+  ExitCode := ERROR_INVALID_PARAMETER;
+  if ParamCount = 0 then
+    Exit;
+
+  ExitCode := STATUS_DLL_INIT_FAILED; // It will be overwritten on success
+  if IsElevated then
+    RunIgnoringIFEOAndWait(ParamsStartingFrom(1))
+  else
+    RunElevatedAndWait(ParamsStartingFrom(1));
 end.

@@ -24,6 +24,13 @@ uses
   CmdUtils in '..\Include\CmdUtils.pas',
   MessageDialog in '..\Include\MessageDialog.pas';
 
+// Since try..except doesn't work without System.SysUtils
+// we should handle all exceptions on our own.
+function HaltOnException(P: PExceptionRecord): IntPtr;
+begin
+  Halt(STATUS_UNHANDLED_EXCEPTION);
+end;
+
 const
   KEY_QUIET = '/quiet'; // Parameter: do not show dialog
 
@@ -32,18 +39,15 @@ resourcestring
   VERB = 'This program is not allowed to run:';
 
 begin
-  try
-    ExitCode := STATUS_DLL_INIT_FAILED;
-    if ParamStr(1) = KEY_QUIET then
-      Exit;
+  ExceptObjProc := @HaltOnException;
+  ExitCode := STATUS_DLL_INIT_FAILED;
+  if ParamStr(1) = KEY_QUIET then
+    Exit;
 
-    { User can't normally interact with Session 0 (except UI0Detect, but we
-      can't rely on it, and it also doesn't cover \Winlogon Desktop), so we
-      wouldn't show any messages in that case. }
-    if not IsZeroSession then
-      ShowMessageOk(CAPTION, VERB, ParamsStartingFrom(1), miError);
-  except
-    ExitCode := STATUS_UNHANDLED_EXCEPTION;;
-  end;
+  { User can't normally interact with Session 0 (except UI0Detect, but we
+    can't rely on it, and it also doesn't cover \Winlogon Desktop), so we
+    wouldn't show any messages in that case. }
+  if not IsZeroSession then
+    ShowMessageOk(CAPTION, VERB, ParamsStartingFrom(1), miError);
 end.
 

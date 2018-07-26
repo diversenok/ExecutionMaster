@@ -225,7 +225,7 @@ function UpdateProcThreadAttribute(lpAttributeList: PProcThreadAttributeEntry;
 ///  Deletes the specified list of attributes for process and thread creation.
 /// </summary>
 procedure DeleteProcThreadAttributeList(lpAttributeList
-  : PProcThreadAttributeEntry);
+  : PProcThreadAttributeEntry); stdcall;
   external kernel32 name 'DeleteProcThreadAttributeList' delayed;
 
 { -------- User defined -------- }
