@@ -38,8 +38,8 @@ begin
     Exit;
   end;
 
-  if RunIgnoringIFEOAndWait(ParamsStartingFrom(1)) = pcsElevationRequired then
-    RunElevatedAndWait(ParamsStartingFrom(1));
+  if RunIgnoringIFEOAndWait(ParamsStartingFrom(1)) = ERROR_ELEVATION_REQUIRED
+    then RunElevatedAndWait(ParamsStartingFrom(1));
 end;
 
 begin

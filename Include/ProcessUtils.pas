@@ -25,10 +25,13 @@ const
   // Let the caller think process failed to start if the user has chosen "No".
   STATUS_DLL_INIT_FAILED = -1073741502; // $C0000142;
 
+  /// <summary>
+  ///  <c>CreateProcess</c> should be replaced with <c>ShellExecuteEx</c>
+  ///  with "runas" verb.
+  /// </summary>
+  ERROR_ELEVATION_REQUIRED = 740;
 
 type
-  TProcessCreationStatus = (pcsSuccess, pcsElevationRequired, pcsFailed);
-
   TTokenIntegrityLevel = (
     ilUntrusted = $0000,
     ilLow = $1000,
@@ -61,29 +64,32 @@ function GetParentPID(ProcessHandle: THandle): Cardinal;
 /// </summary>
 function InitiatorPID: Cardinal;
 
+/// <summary> Reports an error if it occured. </summary>
+procedure LogError(ErrorCode: Cardinal; Where: String);
+
 /// <summary>
 ///  Uses <c>CreateProcess</c> with debugging flags to bypass
 ///  Image-File-Execution-Options.
 /// </summary>
 function RunIgnoringIFEO(out PI: TProcessInformation;
   const Cmd: WideString; hToken: THandle = 0;
-  CurrentDir: WideString = ''): TProcessCreationStatus;
+  CurrentDir: WideString = ''): Cardinal;
 
 /// <summary>
 ///  Calls <c>RunIgnoringIFEO</c> and waits for the newly created process.
 /// </summary>
 function RunIgnoringIFEOAndWait(const Cmd: WideString;
-  hToken: THandle = 0; CurrentDir: WideString = ''): TProcessCreationStatus;
+  hToken: THandle = 0; CurrentDir: WideString = ''): Cardinal;
 
 /// <summary> Requests UAC to run the app at the highest privileges. </summary>
 function RunElevated(out EI: TShellExecuteInfoW; out ElevationMutex: THandle;
-  const Cmd: WideString; const CurrentDir: WideString = ''): TProcessCreationStatus;
+  const Cmd: WideString; const CurrentDir: WideString = ''): Cardinal;
 
 /// <summary>
 ///  Calls <c>RunElevated</c> and waits for the newly created process.
 /// </summary>
 function RunElevatedAndWait(const Cmd: WideString;
-  const CurrentDir: WideString = ''): TProcessCreationStatus;
+  const CurrentDir: WideString = ''): Cardinal;
 
 /// <summary>
 ///  Checks if our parent process is informing us that it used
@@ -134,12 +140,6 @@ function NtQueryInformationProcess(ProcessHandle: THandle;
 { -------- WinBase.h -------- }
 
 const
-  /// <summary>
-  ///  <c>CreateProcess</c> should be replaced with <c>ShellExecuteEx</c>
-  ///  with "runas" verb.
-  /// </summary>
-  ERROR_ELEVATION_REQUIRED = 740;
-
   /// <summary>
   ///  <c>TStartupInfoEx</c> flag for <c>CreateProcess</c>.
   /// </summary>
@@ -231,7 +231,7 @@ procedure DeleteProcThreadAttributeList(lpAttributeList
 
 const
   /// <summary> See <c>RunElevated</c>. </summary>
-  MUTEX_NAME: AnsiString = 'Elevating:';
+  MUTEX_NAME = 'Elevating:';
 
 function IsBelowVista: Boolean;
 var
@@ -309,9 +309,14 @@ begin
   GetDir(0, Result);
 end;
 
-function IntToStr(i: Integer): ShortString;
+function _IntToStr(i: Integer): ShortString; inline;
 begin
   Str(i, Result);
+end;
+
+function IntToStr(i: Integer): String;
+begin
+  Result := String(_IntToStr(i));
 end;
 
 // From SysUtils
@@ -395,8 +400,8 @@ function ParentRequestedElevation: Boolean;
 var
   ElevationMutex: THandle;
 begin // Don't ask the user again if our parent is another instance of Ask.exe
-  ElevationMutex := OpenMutexA(MUTEX_MODIFY_STATE, False,
-    PAnsiChar(MUTEX_NAME + IntToStr(GetParentPID(GetCurrentProcess))));
+  ElevationMutex := OpenMutexW(MUTEX_MODIFY_STATE, False,
+    PWideChar(MUTEX_NAME + IntToStr(GetParentPID(GetCurrentProcess))));
   Result := ElevationMutex <> 0;
   if Result then
     CloseHandle(ElevationMutex);
@@ -466,13 +471,20 @@ begin
   end;
 end;
 
+procedure LogError;
+begin
+  if (ErrorCode <> ERROR_SUCCESS) and
+    (ErrorCode <> ERROR_ELEVATION_REQUIRED) then
+    OutputDebugString(PWideChar('Error in ' + Where + ': ' +
+      IntToStr(ErrorCode)));
+end;
+
 function RunIgnoringIFEO;
 var
   SIEX: TStartupInfoExW;
   hNewParent: THandle;
   lpCommandLine: string;
 begin
-  Result := pcsFailed;
   lpCommandLine := Cmd;
   UniqueString(lpCommandLine); // CreateProcessW can modify lpCommandLine
   FillChar(PI, SizeOf(PI), 0);
@@ -495,18 +507,18 @@ begin
       if CreateProcessAsUserExW(hToken, nil, PWideChar(Cmd), nil, nil, True,
         DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS or EXTENDED_STARTUPINFO_PRESENT,
         nil, PWideChar(CurrentDir), SIEX, PI) then
-        Result := pcsSuccess
-      else if GetLastError = ERROR_ELEVATION_REQUIRED then
-        Result := pcsElevationRequired;
+        Result := ERROR_SUCCESS
+      else
+        Result := GetLastError;
     end
     else
     begin // No token
       if CreateProcessExW(nil, PWideChar(Cmd), nil, nil, True,
         DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS or EXTENDED_STARTUPINFO_PRESENT,
         nil, PWideChar(CurrentDir), SIEX, PI) then
-        Result := pcsSuccess
-      else if GetLastError = ERROR_ELEVATION_REQUIRED then
-        Result := pcsElevationRequired;
+        Result := ERROR_SUCCESS
+      else
+        Result := GetLastError;
     end;
 
     DeleteProcThreadAttributeList(SIEX.lpAttributeList);
@@ -521,27 +533,29 @@ begin
       if CreateProcessAsUserW(hToken, nil, PWideChar(Cmd), nil, nil, True,
         DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS, nil, PWideChar(CurrentDir),
         SIEX.StartupInfo, PI) then
-        Result := pcsSuccess
-      else if GetLastError = ERROR_ELEVATION_REQUIRED then
-        Result := pcsElevationRequired;
+        Result := ERROR_SUCCESS
+      else
+        Result := GetLastError;
     end
     else
     begin
       if CreateProcessW(nil, PWideChar(Cmd), nil, nil, True,
         DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS, nil, PWideChar(CurrentDir),
         SIEX.StartupInfo, PI) then
-        Result := pcsSuccess
-      else if GetLastError = ERROR_ELEVATION_REQUIRED then
-        Result := pcsElevationRequired;
+        Result := ERROR_SUCCESS
+      else
+        Result := GetLastError;
     end;
   end;
 
-  if Result = pcsSuccess then
+  if Result = ERROR_SUCCESS then
   begin
     DebugSetProcessKillOnExit(False); // Should be called after CreateProcess
     if not DebugActiveProcessStop(PI.dwProcessId) then // Detaching
       DebuggerRunAttached; // This really shouldn't happen, but who knows...
   end;
+
+  LogError(Result, 'CreateProcess*');
 end;
 
 function RunIgnoringIFEOAndWait;
@@ -550,7 +564,7 @@ var
   UExitCode: Cardinal;
 begin
   Result := RunIgnoringIFEO(PI, Cmd, hToken, CurrentDir);
-  if Result = pcsSuccess then
+  if Result = ERROR_SUCCESS then
   begin
     WaitForSingleObject(PI.hProcess, INFINITE);
     GetExitCodeProcess(PI.hProcess, UExitCode);
@@ -566,7 +580,6 @@ var
   App, Params: String;
   delim: Integer;
 begin
-  Result := pcsFailed;
   delim := DelimFirstFile(Cmd);
   App := Copy(Cmd, 1, delim - 1);
   Params := Copy(Cmd, delim + 1, Length(Cmd) - delim);
@@ -593,12 +606,15 @@ begin
     launch ourselves with high privileges instead. In case of Ask.exe, we need
     to force it to accept "Yes" without asking. When process will exit — its
     exit code will be transmitted through the chain of processes to the caller. }
-  ElevationMutex := CreateMutexA(nil, False,
-    PAnsiChar(MUTEX_NAME + IntToStr(GetCurrentProcessId)));
+  ElevationMutex := CreateMutexW(nil, False,
+    PWideChar(MUTEX_NAME + IntToStr(GetCurrentProcessId)));
 
-  if ShellExecuteExW(@EI) then
-    if EI.hProcess <> 0 then
-      Result := pcsSuccess;
+  if ShellExecuteExW(@EI) and (EI.hProcess <> 0) then
+    Result := ERROR_SUCCESS
+  else
+    Result := GetLastError;
+
+  LogError(Result, 'ShellExecuteEx');
 end;
 
 function RunElevatedAndWait;
@@ -608,7 +624,7 @@ var
   ElevationMutex: THandle;
 begin
   Result := RunElevated(EI, ElevationMutex, Cmd, CurrentDir);
-  if Result = pcsSuccess then
+  if Result = ERROR_SUCCESS then
   begin
     WaitForSingleObject(EI.hProcess, INFINITE);
     GetExitCodeProcess(EI.hProcess, UExitCode);

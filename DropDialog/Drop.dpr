@@ -71,7 +71,7 @@ begin
   SetTokenInformation(hToken, TokenUIAccess, @UIAccess, SizeOf(UIAccess));
 
   if RunIgnoringIFEOAndWait(ParamsStartingFrom(StartFrom), hToken) =
-    pcsElevationRequired then
+    ERROR_ELEVATION_REQUIRED then
   begin
     if IFEO_Enabled then
       RunElevatedAndWait(ParamsStartingFrom(StartFrom))

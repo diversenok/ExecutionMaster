@@ -51,7 +51,7 @@ begin
 
   ExitCode := STATUS_DLL_INIT_FAILED;  // It will be overwritten on success
   if RunIgnoringIFEOAndWait(ParamsStartingFrom(StartFrom)) =
-    pcsElevationRequired then
+    ERROR_ELEVATION_REQUIRED then
     RunElevatedAndWait(ParamsStartingFrom(StartFrom));
 
   SetThreadExecutionState(ES_CONTINUOUS);
