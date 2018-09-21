@@ -98,6 +98,7 @@
         <DCCReference Include="..\Include\ProcessUtils.pas"/>
         <DCCReference Include="..\Include\CmdUtils.pas"/>
         <DCCReference Include="..\Include\MessageDialog.pas"/>
+        <DCCReference Include="..\Include\SysUtils.Min.pas"/>
         <None Include="Ask.todo"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>

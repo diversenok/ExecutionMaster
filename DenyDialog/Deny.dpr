@@ -22,14 +22,8 @@ uses
   Winapi.Windows,
   ProcessUtils in '..\Include\ProcessUtils.pas',
   CmdUtils in '..\Include\CmdUtils.pas',
-  MessageDialog in '..\Include\MessageDialog.pas';
-
-// Since try..except doesn't work without System.SysUtils
-// we should handle all exceptions on our own.
-function HaltOnException(P: PExceptionRecord): IntPtr;
-begin
-  Halt(STATUS_UNHANDLED_EXCEPTION);
-end;
+  MessageDialog in '..\Include\MessageDialog.pas',
+  SysUtils.Min in '..\Include\SysUtils.Min.pas';
 
 const
   KEY_QUIET = '/quiet'; // Parameter: do not show dialog
@@ -39,7 +33,6 @@ resourcestring
   VERB = 'This program is not allowed to run:';
 
 begin
-  ExceptObjProc := @HaltOnException;
   ExitCode := STATUS_DLL_INIT_FAILED;
   if ParamStr(1) = KEY_QUIET then
     Exit;

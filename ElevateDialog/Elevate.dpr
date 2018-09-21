@@ -21,18 +21,10 @@ program Elevate;
 uses
   Winapi.Windows,
   ProcessUtils in '..\Include\ProcessUtils.pas',
-  CmdUtils in '..\Include\CmdUtils.pas';
-
-// Since try..except doesn't work without System.SysUtils
-// we should handle all exceptions on our own.
-function HaltOnException(P: PExceptionRecord): IntPtr;
-begin
-  Halt(STATUS_UNHANDLED_EXCEPTION);
-end;
+  CmdUtils in '..\Include\CmdUtils.pas',
+  SysUtils.Min in '..\Include\SysUtils.Min.pas';
 
 begin
-  ExceptObjProc := @HaltOnException;
-
   // Actually, Image-File-Execution-Options always pass one or more parameters
   ExitCode := ERROR_INVALID_PARAMETER;
   if ParamCount = 0 then

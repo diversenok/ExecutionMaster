@@ -22,14 +22,8 @@ uses
   Winapi.Windows,
   ProcessUtils in '..\Include\ProcessUtils.pas',
   CmdUtils in '..\Include\CmdUtils.pas',
-  MessageDialog in '..\Include\MessageDialog.pas';
-
-// Since try..except doesn't work without System.SysUtils
-// we should handle all exceptions on our own.
-function HaltOnException(P: PExceptionRecord): IntPtr;
-begin
-  Halt(STATUS_UNHANDLED_EXCEPTION);
-end;
+  MessageDialog in '..\Include\MessageDialog.pas',
+  SysUtils.Min in '..\Include\SysUtils.Min.pas';
 
 resourcestring
   CAPTION = 'Execution Master: approval is required';
@@ -49,7 +43,6 @@ begin
 end;
 
 begin
-  ExceptObjProc := @HaltOnException;
   ExitCode := STATUS_DLL_INIT_FAILED; // Run overwrites it on success
 
   { User can't normally interact with Session 0 (except UI0Detect, but we

@@ -22,14 +22,8 @@ uses
   Winapi.Windows,
   Winapi.Winsafer,
   ProcessUtils in '..\Include\ProcessUtils.pas',
-  CmdUtils in '..\Include\CmdUtils.pas';
-
-// Since try..except doesn't work without System.SysUtils
-// we should handle all exceptions on our own.
-function HaltOnException(P: PExceptionRecord): IntPtr;
-begin
-  Halt(STATUS_UNHANDLED_EXCEPTION);
-end;
+  CmdUtils in '..\Include\CmdUtils.pas',
+  SysUtils.Min in '..\Include\SysUtils.Min.pas';
 
 const
   IFEO_KEY = '/IFEO'; // Makes sure we were launched from IFEO
@@ -41,8 +35,6 @@ var
   UIAccess: DWORD;
 
 begin
-  ExceptObjProc := @HaltOnException;
-
   // Actually, Image-File-Execution-Options always pass one or more parameters
   ExitCode := ERROR_INVALID_PARAMETER;
   if ParamCount = 0 then
@@ -60,10 +52,10 @@ begin
 
   ExitCode := STATUS_DLL_INIT_FAILED; // It will be overwritten on success
 
-  // Trying to handle it without UAC
+  // Try to handle it without UAC
   SetEnvironmentVariable('__COMPAT_LAYER', 'RunAsInvoker');
 
-  // Creating restricted token
+  // Create restricted token
   if not SaferCreateLevel(SAFER_SCOPEID_USER, SAFER_LEVELID_NORMALUSER,
     SAFER_LEVEL_OPEN, hLevel, nil) then
     Exit;

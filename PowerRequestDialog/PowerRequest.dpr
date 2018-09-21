@@ -21,14 +21,8 @@ program PowerRequest;
 uses
   Winapi.Windows,
   CmdUtils in '..\Include\CmdUtils.pas',
-  ProcessUtils in '..\Include\ProcessUtils.pas';
-
-// Since try..except doesn't work without System.SysUtils
-// we should handle all exceptions on our own.
-function HaltOnException(P: PExceptionRecord): IntPtr;
-begin
-  Halt(STATUS_UNHANDLED_EXCEPTION);
-end;
+  ProcessUtils in '..\Include\ProcessUtils.pas',
+  SysUtils.Min in '..\Include\SysUtils.Min.pas';
 
 const
   KEY_DISPLAY = '/display';
@@ -37,8 +31,6 @@ var
   StartFrom: integer;
 
 begin
-  ExceptObjProc := @HaltOnException;
-
   // Actually, Image-File-Execution-Options always pass one or more parameters
   ExitCode := ERROR_INVALID_PARAMETER;
   if ParamCount = 0 then
