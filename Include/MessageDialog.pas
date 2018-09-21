@@ -20,6 +20,8 @@ interface
 uses
   Winapi.Windows;
 
+{$WARN SYMBOL_PLATFORM OFF}
+
 type
   TMessageIcon = (miNone, miInformation, miWarning, miError, miShield);
   TMessageButtons = set of (mbOk, mbYes, mbNo, mbCancel, mbRetry, mbClose);

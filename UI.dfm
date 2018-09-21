@@ -2,10 +2,11 @@ object ExecListDialog: TExecListDialog
   Left = 353
   Top = 325
   Caption = 'Execution Master by diversenok'
-  ClientHeight = 345
+  ClientHeight = 347
   ClientWidth = 693
   Color = clBtnFace
   Constraints.MinWidth = 510
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -18,7 +19,7 @@ object ExecListDialog: TExecListDialog
   OnCreate = FormCreate
   DesignSize = (
     693
-    345)
+    347)
   PixelsPerInch = 96
   TextHeight = 13
   object LabelImagePath: TLabel
@@ -34,16 +35,17 @@ object ExecListDialog: TExecListDialog
     Left = 0
     Top = 0
     Width = 444
-    Height = 309
+    Height = 311
     Anchors = [akLeft, akTop, akRight, akBottom]
     Columns = <
       item
         Caption = 'Executable'
-        MinWidth = 50
+        MinWidth = 100
         Width = 195
       end
       item
         Caption = 'Action'
+        MinWidth = 150
         Width = 220
       end>
     ColumnClick = False
@@ -57,7 +59,7 @@ object ExecListDialog: TExecListDialog
   end
   object ButtonDelete: TButton
     Left = 88
-    Top = 315
+    Top = 317
     Width = 75
     Height = 25
     Hint = 'Deletes the selected action'
@@ -70,7 +72,7 @@ object ExecListDialog: TExecListDialog
   end
   object ButtonRefresh: TBitBtn
     Left = 6
-    Top = 315
+    Top = 317
     Width = 75
     Height = 25
     Anchors = [akLeft, akBottom]
@@ -123,7 +125,7 @@ object ExecListDialog: TExecListDialog
   end
   object ButtonAdd: TButton
     Left = 372
-    Top = 315
+    Top = 317
     Width = 75
     Height = 25
     Hint = 
@@ -251,6 +253,7 @@ object ExecListDialog: TExecListDialog
       Top = 176
       Width = 221
       Height = 21
+      Hint = 'Deny the execution and return the error code to the caller:'
       Style = csDropDownList
       ItemIndex = 2
       TabOrder = 8

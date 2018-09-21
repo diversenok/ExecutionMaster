@@ -274,6 +274,8 @@ begin
   Application.HintHidePause := 20000;
   Constraints.MinHeight := Height;
   MenuRunAsAdmin.Enabled := not ProcessIsElevated;
+  ButtonAdd.ElevationRequired := not ProcessIsElevated;
+  ButtonDelete.ElevationRequired := not ProcessIsElevated;
   SHAutoComplete(EditExec.Handle, SHACF_FILESYS_ONLY);
   if not ProcessIsElevated then
     InitMenuShieldIcon;
