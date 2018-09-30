@@ -43,10 +43,9 @@
         <Icon_MainIcon>EM.ico</Icon_MainIcon>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Configure any program execution;FileVersion=1.4.5.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/;OriginalFilename=ExecutionMaster.exe;ProductName=Execution Master: GUI version;ProductVersion=1.4.5;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Configure any program execution;FileVersion=1.10.0.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/;OriginalFilename=ExecutionMaster.exe;ProductName=Execution Master: GUI version;ProductVersion=1.10;Comments=</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Release>5</VerInfo_Release>
-        <VerInfo_MinorVer>4</VerInfo_MinorVer>
+        <VerInfo_MinorVer>10</VerInfo_MinorVer>
         <SanitizedProjectName>ExecutionMaster</SanitizedProjectName>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
         <DCC_DcuOutput>.\__dcu\$(Platform)-$(Config)</DCC_DcuOutput>

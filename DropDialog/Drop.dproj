@@ -48,10 +48,9 @@
         <DCC_PEOSVersion>6.0</DCC_PEOSVersion>
         <Icon_MainIcon>Drop.ico</Icon_MainIcon>
         <DCC_PESubSysVersion>6.0</DCC_PESubSysVersion>
-        <VerInfo_MinorVer>2</VerInfo_MinorVer>
+        <VerInfo_MinorVer>10</VerInfo_MinorVer>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Release>24</VerInfo_Release>
-        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Runs programs with restricted privileges;FileVersion=1.2.24.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/;OriginalFilename=Drop.exe;ProductName=Execution Master component: Drop admin rights;ProductVersion=1.2;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Runs programs with restricted privileges;FileVersion=1.10.0.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/;OriginalFilename=Drop.exe;ProductName=Execution Master component: Drop admin rights;ProductVersion=1.10;Comments=</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <SanitizedProjectName>Drop</SanitizedProjectName>

@@ -49,13 +49,12 @@
         <DCC_PESubSysVersion>6.0</DCC_PESubSysVersion>
         <Icon_MainIcon>PowerRequest.ico</Icon_MainIcon>
         <SanitizedProjectName>PowerRequest</SanitizedProjectName>
-        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Requests computer not to sleep / display to be on;FileVersion=1.2.24.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/;OriginalFilename=PowerRequest.exe;ProductName=Execution Master components: NoSleep &amp; Display-On;ProductVersion=1.2;Comments=Use /display parameter to force the display be on</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Requests computer not to sleep / display to be on;FileVersion=1.10.0.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/;OriginalFilename=PowerRequest.exe;ProductName=Execution Master components: NoSleep &amp; Display-On;ProductVersion=1.10;Comments=Use /display parameter to force the display be on</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <VerInfo_MinorVer>2</VerInfo_MinorVer>
+        <VerInfo_MinorVer>10</VerInfo_MinorVer>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
-        <VerInfo_Release>24</VerInfo_Release>
         <DCC_DcuOutput>..\__dcu\$(Platform)-$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>..\$(Platform)-$(Config)\Actions</DCC_ExeOutput>
         <DCC_E>false</DCC_E>

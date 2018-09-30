@@ -46,11 +46,10 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <Icon_MainIcon>Deny.ico</Icon_MainIcon>
-        <VerInfo_MinorVer>2</VerInfo_MinorVer>
+        <VerInfo_MinorVer>10</VerInfo_MinorVer>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Release>24</VerInfo_Release>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Denies program execution;FileVersion=1.2.24.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/;OriginalFilename=Deny.exe;ProductName=Execution Master components: Deny &amp; Deny (silent);ProductVersion=1.2;Comments=Use &quot;\quiet&quot; to hide informational message</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=diversenok;FileDescription=Denies program execution;FileVersion=1.10.0.0;InternalName=;LegalCopyright=© diversenok;LegalTrademarks=https://github.com/diversenok/ExecutionMaster/;OriginalFilename=Deny.exe;ProductName=Execution Master components: Deny &amp; Deny (silent);ProductVersion=1.10;Comments=Use &quot;\quiet&quot; to hide informational message</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <SanitizedProjectName>Deny</SanitizedProjectName>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
