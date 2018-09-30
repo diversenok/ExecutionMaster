@@ -71,6 +71,7 @@ procedure LogError(ErrorCode: Cardinal; Where: String);
 ///  Uses <c>CreateProcess</c> with debugging flags to bypass
 ///  Image-File-Execution-Options.
 /// </summary>
+/// <remarks> The function closes the token handle pass to it. </remarks>
 function RunIgnoringIFEO(out PI: TProcessInformation;
   const Cmd: WideString; hToken: THandle = 0;
   CurrentDir: WideString = ''): Cardinal;
@@ -233,11 +234,12 @@ const
   /// <summary> See <c>RunElevated</c>. </summary>
   MUTEX_NAME = 'Elevating:';
 
-function IsBelowVista: Boolean;
+function IsVistaOrLater: Boolean;
 var
-  Version: OSVERSIONINFO;
+  Version: TOSVersionInfoW;
 begin
-  Result := GetVersionEx(Version) and (Version.dwMajorVersion < 6);
+  Version.dwOSVersionInfoSize := SizeOf(Version);
+  Result := GetVersionExW(Version) and (Version.dwMajorVersion >= 6);
 end;
 
 function IsZeroSession: Boolean;
@@ -246,7 +248,7 @@ var
   Session, BufferSize: DWORD;
 begin
   Result := False;
-  if IsBelowVista then // Lie for Windows XP
+  if not IsVistaOrLater then // Lie for Windows XP
     Exit;
   if OpenProcessToken(GetCurrentProcess, TOKEN_QUERY, TokenHandle) then
   begin
@@ -475,8 +477,7 @@ procedure LogError;
 begin
   if (ErrorCode <> ERROR_SUCCESS) and
     (ErrorCode <> ERROR_ELEVATION_REQUIRED) then
-    OutputDebugString(PWideChar('Error in ' + Where + ': ' +
-      IntToStr(ErrorCode)));
+    OutputDebugString(PWideChar(Where + ' returned ' + IntToStr(ErrorCode)));
 end;
 
 function RunIgnoringIFEO;
@@ -493,33 +494,25 @@ begin
   if CurrentDir = '' then
     CurrentDir := GetCurrentDir;
 
+  if hToken = 0 then
+    OpenProcessToken(GetCurrentProcess, TOKEN_QUERY or TOKEN_ASSIGN_PRIMARY
+      or TOKEN_DUPLICATE, hToken);
+
   { Creating process under the debugger. This action wouldn't be intercepted by
     Image-File-Execution-Options, so we wouldn't launch ourselves again. }
 
   // SetNewParent tries to prepare SIEX.lpAttributeList
-  if not IsBelowVista and SetNewParent(hNewParent, SIEX) then
+  if (hToken <> 0) and IsVistaOrLater and SetNewParent(hNewParent, SIEX) then
   begin
     // Using TStartupInfoExW with EXTENDED_STARTUPINFO_PRESENT
     SIEX.StartupInfo.cb := SizeOf(TStartupInfoExW);
 
-    if hToken <> 0 then
-    begin // An external token is provided
-      if CreateProcessAsUserExW(hToken, nil, PWideChar(Cmd), nil, nil, True,
-        DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS or EXTENDED_STARTUPINFO_PRESENT,
-        nil, PWideChar(CurrentDir), SIEX, PI) then
-        Result := ERROR_SUCCESS
-      else
-        Result := GetLastError;
-    end
+    if CreateProcessAsUserExW(hToken, nil, PWideChar(Cmd), nil, nil, True,
+      DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS or EXTENDED_STARTUPINFO_PRESENT,
+      nil, PWideChar(CurrentDir), SIEX, PI) then
+      Result := ERROR_SUCCESS
     else
-    begin // No token
-      if CreateProcessExW(nil, PWideChar(Cmd), nil, nil, True,
-        DEBUG_PROCESS or DEBUG_ONLY_THIS_PROCESS or EXTENDED_STARTUPINFO_PRESENT,
-        nil, PWideChar(CurrentDir), SIEX, PI) then
-        Result := ERROR_SUCCESS
-      else
-        Result := GetLastError;
-    end;
+      Result := GetLastError;
 
     DeleteProcThreadAttributeList(SIEX.lpAttributeList);
     CloseHandle(hNewParent); // Only after deleting ProcThreadAttributes
@@ -547,6 +540,9 @@ begin
         Result := GetLastError;
     end;
   end;
+
+  if hToken <> 0 then
+    CloseHandle(hToken);
 
   if Result = ERROR_SUCCESS then
   begin

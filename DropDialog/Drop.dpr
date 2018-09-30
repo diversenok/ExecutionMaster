@@ -81,5 +81,4 @@ begin
         elevated token is to start it from another instance of Drop.exe
         with higher privileges.}
   end;
-  CloseHandle(hToken);
 end.
