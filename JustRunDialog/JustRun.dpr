@@ -22,30 +22,31 @@ uses
   Winapi.Windows,
   Winapi.ShellApi,
   CmdUtils in '..\Include\CmdUtils.pas',
-  ProcessUtils in '..\Include\ProcessUtils.pas';
+  ProcessUtils in '..\Include\ProcessUtils.pas',
+  SysUtils.Min in '..\Include\SysUtils.Min.pas';
 
 resourcestring
   NO_WAIT = '/nowait';
 
-function RunIgnoringIFEOAndNoWait(const Cmd: WideString): TProcessCreationStatus;
+function RunIgnoringIFEOAndNoWait(const Cmd: WideString): Cardinal;
 var
   PI: TProcessInformation;
 begin
   Result := RunIgnoringIFEO(PI, Cmd);
-  if Result = pcsSuccess then
+  if Result = ERROR_SUCCESS then
   begin
     CloseHandle(PI.hProcess);
     CloseHandle(PI.hThread);
   end;
 end;
 
-function RunElevatedAndNoWait(const Cmd: WideString): TProcessCreationStatus;
+function RunElevatedAndNoWait(const Cmd: WideString): Cardinal;
 var
   EI: TShellExecuteInfoW;
   ElevationMutex: THandle;
 begin
   Result := RunElevated(EI, ElevationMutex, Cmd);
-  if Result = pcsSuccess then
+  if Result = ERROR_SUCCESS then
   begin
     CloseHandle(EI.hProcess);
     CloseHandle(ElevationMutex);
@@ -53,24 +54,22 @@ begin
 end;
 
 begin
-  try
-    if ParamCount = 0 then
+  if ParamCount = 0 then
+    Halt(ERROR_INVALID_PARAMETER);
+
+  if ParamStr(1) = NO_WAIT then
+  begin
+    if ParamCount < 2 then
       Halt(ERROR_INVALID_PARAMETER);
 
-    if ParamStr(1) = NO_WAIT then
-    begin
-      if ParamCount < 2 then
-        Halt(ERROR_INVALID_PARAMETER);
-
-      if RunIgnoringIFEOAndNoWait(ParamsStartingFrom(2)) = pcsElevationRequired
-        then RunElevatedAndNoWait(ParamsStartingFrom(2));
-    end
-    else
-    begin
-      if RunIgnoringIFEOAndWait(ParamsStartingFrom(1)) = pcsElevationRequired
-        then RunElevatedAndWait(ParamsStartingFrom(1));
-    end;
-  except
-    ExitCode := STATUS_UNHANDLED_EXCEPTION;
+    if RunIgnoringIFEOAndNoWait(ParamsStartingFrom(2)) =
+      ERROR_ELEVATION_REQUIRED then
+      RunElevatedAndNoWait(ParamsStartingFrom(2));
+  end
+  else
+  begin
+    if RunIgnoringIFEOAndWait(ParamsStartingFrom(1)) =
+      ERROR_ELEVATION_REQUIRED then
+      RunElevatedAndWait(ParamsStartingFrom(1));
   end;
 end.
