@@ -24,9 +24,6 @@ uses
   CmdUtils in '..\Include\CmdUtils.pas',
   SysUtils.Min in '..\Include\SysUtils.Min.pas';
 
-var
-  hToken: THandle;
-
 begin
   // Actually, Image-File-Execution-Options always pass one or more parameters
   ExitCode := ERROR_INVALID_PARAMETER;
@@ -35,17 +32,7 @@ begin
 
   ExitCode := STATUS_DLL_INIT_FAILED; // It will be overwritten on success
   if IsElevated then
-  begin
-    if OpenProcessToken(GetCurrentProcess, TOKEN_QUERY or TOKEN_ASSIGN_PRIMARY
-      or TOKEN_DUPLICATE,
-      hToken) then
-    begin
-      RunIgnoringIFEOAndWait(ParamsStartingFrom(1), hToken);
-      CloseHandle(hToken);
-    end
-    else
-      LogError(GetLastError, 'OpenProcessToken');
-  end
+    RunIgnoringIFEOAndWait(ParamsStartingFrom(1))
   else
     RunElevatedAndWait(ParamsStartingFrom(1));
 end.
