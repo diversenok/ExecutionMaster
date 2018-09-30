@@ -149,6 +149,8 @@ const
   // Replaces parent process
   PROC_THREAD_ATTRIBUTE_PARENT_PROCESS = $20000;
 
+  STATUS_UNSUCCESSFUL: NTSTATUS = $C0000001;
+
 type
   PProcThreadAttributeEntry = Pointer;
 
@@ -176,8 +178,8 @@ function DebugSetProcessKillOnExit(KillOnExit: BOOL): BOOL; stdcall;
 ///  If you don't want to kill the process use
 ///  <c>DebugSetProcessKillOnExit(False)</c> before detaching debugger.
 /// </remarks>
-function DebugActiveProcessStop(dwProcessId: DWORD): BOOL; stdcall;
-  external kernel32 name 'DebugActiveProcessStop';
+function DbgUiStopDebugging(hProcess: THandle): NTSTATUS; stdcall;
+  external 'ntdll.dll';
 
 /// <summary> Extended version of <c>CreateProcessW</c>. </summary>
 /// <remarks>
@@ -547,7 +549,7 @@ begin
   if Result = ERROR_SUCCESS then
   begin
     DebugSetProcessKillOnExit(False); // Should be called after CreateProcess
-    if not DebugActiveProcessStop(PI.dwProcessId) then // Detaching
+    if DbgUiStopDebugging(PI.hProcess) >= STATUS_UNSUCCESSFUL then // Detaching
       DebuggerRunAttached; // This really shouldn't happen, but who knows...
   end;
 
