@@ -220,11 +220,19 @@ begin
         Exit;
 
   if CurrentAction in [aAsk..aDisplayOn, aExecuteEx] then
+  begin
     for i := Low(CompatibilityProblems) to High(CompatibilityProblems) do
       if LowerCase(EditImage.Text) = CompatibilityProblems[i] then
         if ShowMessageEx(Handle, PROGRAM_NAME, ARE_YOU_SURE, Format(WARN_COMPAT,
           [EditImage.Text]), miWarning, [mbYes, mbNo]) <> IDYES then
           Exit;
+
+    for i := Low(UIAccessPrograms) to High(UIAccessPrograms) do
+      if LowerCase(EditImage.Text) = UIAccessPrograms[i] then
+        if ShowMessageEx(Handle, PROGRAM_NAME, ARE_YOU_SURE, Format(
+          WARN_UIACCESS, [EditImage.Text]), miWarning, [mbYes, mbNo]) <> IDYES
+          then Exit;
+  end;
 
   Core.AddDebugger(TIFEORec.Create(CurrentAction, EditImage.Text,
     EditExec.Text));

@@ -114,6 +114,7 @@ begin
     end;
 
   if Action in [aAsk..aDisplayOn, aExecuteEx] then
+  begin
     for i := Low(CompatibilityProblems) to High(CompatibilityProblems) do
       if LowerCase(Executable) = CompatibilityProblems[i] then
       begin
@@ -123,12 +124,22 @@ begin
           raise Exception.Create(ERR_CANCELED);
         Break;
       end;
+
+    for i := Low(UIAccessPrograms) to High(UIAccessPrograms) do
+      if LowerCase(Executable) = UIAccessPrograms[i] then
+      begin
+        write(Format(WARN_UIACCESS + WARN, [Executable]));
+        readln(Answer);
+        if LowerCase(Answer) <> 'y' then
+          raise Exception.Create(ERR_CANCELED);
+        Break;
+      end;
+  end;
 end;
 
 procedure ActionSet;
 var
   a: TAction;
-  CodeToRaise: Integer;
   Dbg: TIFEORec;
   executable: string;
 begin

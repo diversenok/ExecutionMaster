@@ -619,6 +619,13 @@ var
   UExitCode: Cardinal;
   ElevationMutex: THandle;
 begin
+  if IsElevated then
+  begin
+    OutputDebugString('Infinite loop detected: elevated process requested ' +
+      'elevation. Are you trying to start an UIAccess program?');
+    Exit(ERROR_ELEVATION_REQUIRED);
+  end;
+
   Result := RunElevated(EI, ElevationMutex, Cmd, CurrentDir);
   if Result = ERROR_SUCCESS then
   begin

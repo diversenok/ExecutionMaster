@@ -68,7 +68,7 @@ begin
     raise Exception.Create('The operation was canceled by the user.');
 end;
 
-procedure CheckForProblems(S: String);
+procedure CheckForProblems(Action: TAction; S: String);
 var
   i: integer;
 begin
@@ -79,12 +79,22 @@ begin
       Break;
     end;
 
-  for i := Low(CompatibilityProblems) to High(CompatibilityProblems) do
-    if LowerCase(S) = CompatibilityProblems[i] then
-    begin
-      CheckerUI(Format(WARN_COMPAT, [S]));
-      Break;
-    end;
+  if Action in [aAsk..aDisplayOn, aExecuteEx] then
+  begin
+    for i := Low(CompatibilityProblems) to High(CompatibilityProblems) do
+      if LowerCase(S) = CompatibilityProblems[i] then
+      begin
+        CheckerUI(Format(WARN_COMPAT, [S]));
+        Break;
+      end;
+
+    for i := Low(UIAccessPrograms) to High(UIAccessPrograms) do
+      if LowerCase(S) = UIAccessPrograms[i] then
+      begin
+        CheckerUI(Format(WARN_UIACCESS, [S]));
+        Break;
+      end;
+  end;
 end;
 
 procedure ActionSet;
@@ -108,7 +118,7 @@ begin
     raise Exception.Create(ERR_ACTION);
 
   executable := ExtractFileName(ParamStr(2));
-  CheckForProblems(executable);
+  CheckForProblems(a, executable);
   Dbg := TIFEORec.Create(a, executable);
   TImageFileExecutionOptions.RegisterDebugger(Dbg);
   ShowStatusMessage('The action was successfully set.', executable + '  →  ' +

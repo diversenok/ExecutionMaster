@@ -62,6 +62,14 @@ const
   WARN_COMPAT = 'There are some compatibility problems with setting actions ' +
     'on "%s". This program may start to work incorrectly. Continue anyway?';
 
+  /// <summary> Well-known UIAccess programs. </summary>
+  UIAccessPrograms: array [0 .. 4] of String = ('osk.exe', 'magnify.exe',
+    'narrator.exe', 'msra.exe', 'wisptis.exe');
+
+  /// <summary> Warning for <c>UIAccessPrograms</c>. </summary>
+  WARN_UIACCESS = 'Execution Master has some problems with running UIAccess ' +
+    'programs. And "%s" is one of those. Continue anyway?';
+
 var
   EMDebuggers: array [TAction] of string;
 

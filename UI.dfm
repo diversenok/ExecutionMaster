@@ -41,12 +41,12 @@ object ExecListDialog: TExecListDialog
       item
         Caption = 'Executable'
         MinWidth = 100
-        Width = 195
+        Width = 150
       end
       item
         Caption = 'Action'
         MinWidth = 150
-        Width = 220
+        Width = 265
       end>
     ColumnClick = False
     DoubleBuffered = True
