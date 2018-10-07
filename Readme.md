@@ -16,7 +16,7 @@ run it. You can assign one of the several standard actions for it:
 
 The latest version also contains shell extension:
 
-![](https://user-images.githubusercontent.com/30962924/46260801-69725e00-c4f3-11e8-9f05-5e251d063b9f.png)
+![](https://user-images.githubusercontent.com/30962924/46580600-a3ca8680-ca30-11e8-953d-ddffb3cfe4dc.png)
 
 ## Downloads
 
