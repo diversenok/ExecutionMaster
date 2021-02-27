@@ -50,7 +50,9 @@ debugger for the specified program. These small utilities from *Actions* folder
 are designed to be set as such debuggers so they can perform some special activity
 before approving the creation of the original process.
 
-For Russian users: см. статью «[Перехватываем запуск любого приложения в Windows и пытаемся ничего не сломать](https://habr.com/post/335736/)».
+You can find more details in the dedicated blog post:
+ - In English: [Intercepting Program Startup on Windows and Trying to Not Mess Things Up](https://diversenok.github.io/2021/02/26/IFEO.html)
+ - In Russian: [Перехватываем запуск любого приложения в Windows и пытаемся ничего не сломать](https://habr.com/post/335736/).
 
 ------------------------------------------------------------------------------
 
